@@ -3,13 +3,13 @@ begin # Initialization
     ##############################################################
     ## Use this varibale to define the size of the input files ##
     ##############################################################
-    const inputSize = "small" # small, medium, big
+    const inputValues = "generated" # small, medium, big, generated
     ##############################################################
 
-    @assert inputSize in ["small", "medium", "big"]
-    ENV["JULIA_DEBUG"] = "CAMNAS" # Enable debug output
-    ENV["JL_MNA_RUNTIME_SWITCH"] = "true" # Enable runtime switch
-    ENV["JL_MNA_PRINT_ACCELERATOR"] = "true" # Enable printing accelerator in each solve steps
+    @assert inputValues in ["small", "medium", "big", "generated"]
+    ENV["JULIA_DEBUG"] = "CAMNAS"#"" # Enable debug output
+    # ENV["JL_MNA_RUNTIME_SWITCH"] = "true" # Enable runtime switch
+    # ENV["JL_MNA_PRINT_ACCELERATOR"] = "true" # Enable printing accelerator in each solve steps
     push!(LOAD_PATH, pwd())
     #push!(LOAD_PATH, "$(pwd())/accelerators")
     @info LOAD_PATH
@@ -55,10 +55,24 @@ begin # Initialization
         rhs_vector = parse.(Float64, split(rhs_vector_strings[1]))
     end
 
+    if inputValues == "generated"
+        include("Generator.jl")
+        dimension::UInt = 3
+        matrix = Generator.generate_matrix(dimension)
+        csr_matrix = Generator.to_csr(matrix)
+        rhs_vector = Generator.generate_rhs_vector(matrix) # assign directly
+
+        Generator.to_files(csr_matrix, rhs_vector)
+    end
+
+    system_matrix = read_input(ArrayPath("$(@__DIR__)/system_matrix_$inputValues.txt"))
+    rhs_vector = read_input(VectorPath("$(@__DIR__)/rhs_$inputValues.txt"))
+
     GC.enable(false) # We cannot be sure that system_matrix is garbage collected before the pointer is passed...
-    system_matrix = read_input(ArrayPath("$(@__DIR__)/system_matrix_$inputSize.txt"))
+    
     system_matrix_ptr = pointer_from_objref(system_matrix)
-    rhs_vector = read_input(VectorPath("$(@__DIR__)/rhs_$inputSize.txt"))
+    @debug "deref system_matrix_ptr: $(Base.dereference(system_matrix_ptr))"
+
     lhs_vector = zeros(Float64, length(rhs_vector))
     rhs_reset = ones(Float64, length(rhs_vector))
 
@@ -67,16 +81,11 @@ begin # Initialization
 end # end Initialization
 
 begin # Decomposition step
-    GC.enable(false) # We cannot be sure that system_matrix is garbage collected before the pointer is passed...
-    system_matrix = read_input(ArrayPath("$(@__DIR__)/system_matrix_$inputSize.txt"))
+GC.enable(false)
+    system_matrix = read_input(ArrayPath("$(@__DIR__)/system_matrix_$inputValues.txt"))
     system_matrix_ptr = pointer_from_objref(system_matrix)
-    rhs_vector = read_input(VectorPath("$(@__DIR__)/rhs_$inputSize.txt"))
-    lhs_vector = zeros(Float64, length(rhs_vector))
-    rhs_reset = ones(Float64, length(rhs_vector))
-
-    
     @time decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, system_matrix_ptr))
-    GC.enable(true)
+GC.enable(true)
 end # end Decomposition
 
 begin # Solving step 
