@@ -69,7 +69,7 @@ begin # Initialization
     rhs_vector = read_input(VectorPath("$(@__DIR__)/rhs_$inputValues.txt"))
 
     GC.enable(false) # We cannot be sure that system_matrix is garbage collected before the pointer is passed...
-    
+
     system_matrix_ptr = pointer_from_objref(system_matrix)
     @debug "deref system_matrix_ptr: $(Base.dereference(system_matrix_ptr))"
 
@@ -81,11 +81,11 @@ begin # Initialization
 end # end Initialization
 
 begin # Decomposition step
-GC.enable(false)
+    GC.enable(false)
     system_matrix = read_input(ArrayPath("$(@__DIR__)/system_matrix_$inputValues.txt"))
     system_matrix_ptr = pointer_from_objref(system_matrix)
     @time decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, system_matrix_ptr))
-GC.enable(true)
+    GC.enable(true)
 end # end Decomposition
 
 begin # Solving step 
@@ -95,3 +95,65 @@ end # end Solving
 begin # Cleanup step
     cleanup()
 end # end Cleanup
+
+begin # Benchmark
+    include("Generator.jl")
+
+    using BenchmarkTools
+    using Plots
+    using CSV, DataFrames
+
+    # Benchmark parameters
+    BenchmarkTools.DEFAULT_PARAMETERS.samples = 3
+    accelerators = [CAMNAS.NoAccelerator(), CAMNAS.CUDAccelerator()]
+    dimensions = UInt[1000:500:2000...]
+    densities = Float64[0.01:0.01:0.3...]
+
+    saved_debug_env = ENV["JULIA_DEBUG"]
+    ENV["JULIA_DEBUG"] = "" # Disable debug output
+    
+    for dimension in dimensions
+        for density in densities
+            matrix_path = "$(@__DIR__)/../benchmark/system_matrix_($dimension)_($density).txt"
+            rhs_path = "$(@__DIR__)/../benchmark/rhs_($dimension)_($density).txt"
+
+            # Generate Test Matrixes and RHS vectors
+            print("Generating...")
+            matrix = Generator.generate_matrix(dimension; density=density)
+            csr_matrix = Generator.to_csr(matrix)
+            rhs_vector = Generator.generate_rhs_vector(matrix)
+            Generator.to_files(csr_matrix, rhs_vector; 
+                                matrix_path=matrix_path,
+                                rhs_path=rhs_path)
+            println("Done.")
+
+            for (i,accelerator) in enumerate(accelerators)
+                # Set accelerator
+                CAMNAS.set_accelerator!(accelerator)
+                println("Benchmarking: $(CAMNAS.accelerator) on $dimension x $dimension with density=$density")
+
+                system_matrix = read_input(ArrayPath(matrix_path))
+                rhs_vector = read_input(VectorPath(rhs_path))
+
+                # Decomposition
+                GC.enable(false)
+                
+                system_matrix_ptr = pointer_from_objref(system_matrix)
+                decomp_elapses = @belapsed decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, system_matrix_ptr))
+
+                # Solving
+                lhs_vector = zeros(Float64, length(rhs_vector))
+                solve_elapses = @belapsed solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_vector), Base.unsafe_convert(Ptr{Cdouble}, lhs_vector))
+                GC.enable(true)
+
+                data_frame = DataFrame(accelerator = [accelerator], dimension = [dimension], density = [density], decomp_elapses = [decomp_elapses], solve_elapses = [solve_elapses] )
+                CSV.write("benchmark/data.csv", data_frame; append=true)
+
+                println(" Done.")
+            end
+        end
+
+    end
+
+    ENV["JULIA_DEBUG"] = saved_debug_env # Restore env setting
+end
