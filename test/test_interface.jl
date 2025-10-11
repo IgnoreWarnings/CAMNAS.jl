@@ -80,7 +80,7 @@ begin # Decomposition step
 end # end Decomposition
 
 begin # Solving step 
-    @time solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_reset), Base.unsafe_convert(Ptr{Cdouble}, lhs_vector))
+    @time solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_vector), Base.unsafe_convert(Ptr{Cdouble}, lhs_vector))
 end # end Solving
 
 begin # Cleanup step
