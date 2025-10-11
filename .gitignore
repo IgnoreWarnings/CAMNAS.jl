@@ -4,3 +4,6 @@ CAMNASCompiled
 */perfiles
 *.perf
 *.data.*
+
+*_generated.txt
+benchmark/
