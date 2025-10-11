@@ -83,7 +83,8 @@ Base.@ccallable function solve(rhs_values_ptr::Ptr{Cdouble}, lhs_values_ptr::Ptr
     @debug @isdefined system_matrix
     (@isdefined system_matrix) || ( error("System matrix not initialized! Call init or decomp first!"); return -1 )
 
-    dim = size(system_matrix[1])[1] # Matrix is quadratic, so we can use m or n
+    # dim = size(system_matrix[2])[1] # Matrix is quadratic, so we can use m or n
+    isnothing(system_matrix[1]) ? dim = size(system_matrix[2])[1] : dim = size(system_matrix[1])[1] 
     rhs = unsafe_wrap(Array, rhs_values_ptr, dim)
 
     @debug "rhs = $rhs"
