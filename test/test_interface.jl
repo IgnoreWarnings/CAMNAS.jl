@@ -150,7 +150,8 @@ begin # Benchmark
                 GC.enable(true)
 
                 data_frame = DataFrame(accelerator = [accelerator], dimension = [dimension], density = [density], decomp_elapses = [decomp_elapses], solve_elapses = [solve_elapses] )
-                CSV.write("$benchmarkPath/data.csv", data_frame; append=true)
+                append = isfile("$benchmarkPath/data.csv") # with append no header is written
+                CSV.write("$benchmarkPath/data.csv", data_frame; append=append)
 
                 println(" Done.")
             end
@@ -159,4 +160,32 @@ begin # Benchmark
     end
 
     ENV["JULIA_DEBUG"] = saved_debug_env # Restore env setting
+end
+
+begin # Plot
+    using Plotly
+    using CSV, DataFrames
+
+    dimension = 1500
+
+    benchmarkPath = "$(@__DIR__)/../benchmark"
+    csv = CSV.read("$benchmarkPath/data.csv", DataFrame)
+
+    filtered = filter(row -> row.accelerator == "CAMNAS.NoAccelerator()" && row.dimension == dimension, csv)
+
+    cpu_trace = scatter(x=filtered.density,
+                        y=filtered.decomp_elapses, 
+                        mode="lines", 
+                        name="CAMNAS.NoAccelerator()")
+
+    filtered = filter(row -> row.accelerator == "CAMNAS.CUDAccelerator()" && row.dimension == dimension, csv)
+
+    gpu_trace = scatter(x=filtered.density,
+                        y=filtered.decomp_elapses, 
+                        mode="lines", 
+                        name="CAMNAS.CUDAccelerator()")
+
+    PlotlyJS.display(plot([cpu_trace, gpu_trace], Layout(title="Solvestep",
+                                    xaxis=attr(title="Density"),
+                                    yaxis=attr(title="Time"))))
 end
