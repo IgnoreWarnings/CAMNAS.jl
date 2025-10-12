@@ -113,7 +113,8 @@ begin # Benchmark
     ENV["JULIA_DEBUG"] = "" # Disable debug output
 
     # Create folder for benchmark results
-    mkpath("$(@__DIR__)/../benchmark")
+    benchmarkPath = "$(@__DIR__)/../benchmark"
+    mkpath(benchmarkPath)
     
     for dimension in dimensions
         for density in densities
@@ -122,8 +123,8 @@ begin # Benchmark
             matrix = Generator.generate_matrix(dimension; density=density)
             csr_matrix = Generator.to_csr(matrix)
             rhs_vector = Generator.generate_rhs_vector(matrix)
-            matrix_path = "$(@__DIR__)/../benchmark/system_matrix_($dimension)_($density).txt"
-            rhs_path = "$(@__DIR__)/../benchmark/rhs_($dimension)_($density).txt"
+            matrix_path = "$benchmarkPath/system_matrix_($dimension)_($density).txt"
+            rhs_path = "$benchmarkPath/rhs_($dimension)_($density).txt"
             Generator.to_files(csr_matrix, rhs_vector; 
                                 matrix_path=matrix_path,
                                 rhs_path=rhs_path)
@@ -149,7 +150,7 @@ begin # Benchmark
                 GC.enable(true)
 
                 data_frame = DataFrame(accelerator = [accelerator], dimension = [dimension], density = [density], decomp_elapses = [decomp_elapses], solve_elapses = [solve_elapses] )
-                CSV.write("benchmark/data.csv", data_frame; append=true)
+                CSV.write("$benchmarkPath/data.csv", data_frame; append=true)
 
                 println(" Done.")
             end
