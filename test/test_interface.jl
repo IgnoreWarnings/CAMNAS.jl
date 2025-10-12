@@ -108,19 +108,22 @@ begin # Benchmark
     dimensions = UInt[1000:500:2000...]
     densities = Float64[0.01:0.01:0.3...]
 
+    # Disable debug information during benchmark
     saved_debug_env = ENV["JULIA_DEBUG"]
     ENV["JULIA_DEBUG"] = "" # Disable debug output
+
+    # Create folder for benchmark results
+    mkpath("$(@__DIR__)/../benchmark")
     
     for dimension in dimensions
         for density in densities
-            matrix_path = "$(@__DIR__)/../benchmark/system_matrix_($dimension)_($density).txt"
-            rhs_path = "$(@__DIR__)/../benchmark/rhs_($dimension)_($density).txt"
-
             # Generate Test Matrixes and RHS vectors
             print("Generating...")
             matrix = Generator.generate_matrix(dimension; density=density)
             csr_matrix = Generator.to_csr(matrix)
             rhs_vector = Generator.generate_rhs_vector(matrix)
+            matrix_path = "$(@__DIR__)/../benchmark/system_matrix_($dimension)_($density).txt"
+            rhs_path = "$(@__DIR__)/../benchmark/rhs_($dimension)_($density).txt"
             Generator.to_files(csr_matrix, rhs_vector; 
                                 matrix_path=matrix_path,
                                 rhs_path=rhs_path)
