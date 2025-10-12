@@ -100,7 +100,6 @@ begin # Benchmark
     include("Generator.jl")
 
     using BenchmarkTools
-    using Plots
     using CSV, DataFrames
 
     # Benchmark parameters
