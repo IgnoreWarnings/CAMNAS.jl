@@ -6,7 +6,8 @@ using LinearAlgebra
 
 
 # Note: Density is rounded and not precicse.
-function generate_matrix(dimension::UInt; density::Float64 = 0.01, magnitude_off::Float64 = 0.05, delta::Float64 = 0.5)
+function generate_matrix(dimension::UInt; density::Float64 = 0.01, magnitude_off::Float64 = 0.05, delta::Float64 = 0.5, seed=rand(UInt))
+    Random.seed!(seed)
     matrix = zeros(Float64, dimension, dimension)
 
     for i in 1:dimension
@@ -18,7 +19,7 @@ function generate_matrix(dimension::UInt; density::Float64 = 0.01, magnitude_off
             matrix[i, j] = rand() * 2magnitude_off - magnitude_off
         end
     
-        # Diagonale dominance
+        # diagonal dominance
         row_sum = sum(abs.(matrix[i, :]))
         matrix[i, i] = row_sum + delta
     end
