@@ -138,15 +138,16 @@ begin # Benchmark
                 system_matrix = read_input(ArrayPath(matrix_path))
                 rhs_vector = read_input(VectorPath(rhs_path))
 
-                # Decomposition
                 GC.enable(false)
                 
+                # Decomposition
                 system_matrix_ptr = pointer_from_objref(system_matrix)
                 decomp_elapses = @belapsed decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, system_matrix_ptr))
 
                 # Solving
                 lhs_vector = zeros(Float64, length(rhs_vector))
-                solve_elapses = @belapsed solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_vector), Base.unsafe_convert(Ptr{Cdouble}, lhs_vector))
+                solve_elapses = @elapsed solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_vector), Base.unsafe_convert(Ptr{Cdouble}, lhs_vector))
+                
                 GC.enable(true)
 
                 data_frame = DataFrame(accelerator = [accelerator], dimension = [dimension], density = [density], decomp_elapses = [decomp_elapses], solve_elapses = [solve_elapses] )
