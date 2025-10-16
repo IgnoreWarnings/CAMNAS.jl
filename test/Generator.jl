@@ -3,7 +3,7 @@ module Generator
 using Random
 using SparseMatricesCSR
 using LinearAlgebra
-
+using Base
 
 # Note: Density is rounded and not precicse.
 function generate_matrix(dimension::UInt; density::Float64 = 0.01, magnitude_off::Float64 = 0.05, delta::Float64 = 0.5, seed=rand(UInt))
@@ -27,12 +27,28 @@ function generate_matrix(dimension::UInt; density::Float64 = 0.01, magnitude_off
     return matrix
 end
 
+@kwdef struct Settings
+    dimension::UInt
+    density::Float64
+    magnitude_off::Float64
+    delta::Float64
+    seed::UInt
+end
+
+function generate_matrix(settings::Settings)
+    generate_matrix(
+        settings.dimension,
+        density = settings.density,
+        magnitude_off = settings.magnitude_off,
+        delta = settings.delta,
+        seed = settings.seed
+    )
+end
 
 function generate_rhs_vector(matrix::Matrix{Float64}, prefered_solution::Vector{Float64} = ones(Float64, size(matrix, 1))) 
     rhs_vector = matrix*prefered_solution
     return rhs_vector
 end
-
 
 function to_csr(matrix)
     csr = SparseMatrixCSR(matrix)
@@ -40,7 +56,6 @@ function to_csr(matrix)
     csr.rowptr .-= 1  # Convert row pointers to 0-based
     return csr
 end
-
 
 function to_files(csr::SparseMatrixCSR, rhs_vector::Vector{Float64}; matrix_path="$(@__DIR__)/system_matrix_generated.txt", rhs_path="$(@__DIR__)/rhs_generated.txt")
     # write matrix to file
