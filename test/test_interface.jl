@@ -186,7 +186,7 @@ begin # Plot
                         mode="lines", 
                         name="CAMNAS.CUDAccelerator()")
 
-    PlotlyJS.display(plot([cpu_trace, gpu_trace], Layout(title="Solvestep",
+    PlotlyJS.display(plot([cpu_trace, gpu_trace], Layout(title="Solvestep of $dimension",
                                     xaxis=attr(title="Density"),
                                     yaxis=attr(title="Time"))))
 end
