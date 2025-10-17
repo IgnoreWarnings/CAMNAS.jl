@@ -45,7 +45,7 @@ function generate_matrix(settings::Settings)
     )
 end
 
-function generate_rhs_vector(matrix::Matrix{Float64}, prefered_solution::Vector{Float64} = ones(Float64, size(matrix, 1))) 
+function generate_rhs_vector(matrix::Matrix{Float64}; prefered_solution::Vector{Float64} = ones(Float64, size(matrix, 1))) 
     rhs_vector = matrix*prefered_solution
     return rhs_vector
 end
