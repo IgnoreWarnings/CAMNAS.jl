@@ -52,8 +52,8 @@ using Suppressor
     end        
 
     @testset "Generator" begin
-        using LinearAlgebra
         include("Generator.jl")
+        include("MatrixValidator.jl")
 
         settings = Generator.Settings(
             dimension = rand(500:3000),
@@ -65,30 +65,27 @@ using Suppressor
 
         matrix = Generator.generate_matrix(settings)
 
-        # Dimension
-        @test (size(matrix, 1) == settings.dimension) && (size(matrix, 2) == settings.dimension)
+        # Dimensions
+        @test MatrixValidator.is_quadratic(matrix)
+        @test MatrixValidator.m(matrix) == settings.dimension
+        @test MatrixValidator.n(matrix) == settings.dimension
 
         # Density
-        non_zeroes = count(!iszero, matrix)
-        total_elements = size(matrix, 1) * size(matrix, 2)
-        density = non_zeroes / total_elements
+        density = MatrixValidator.density(matrix)
         @test isapprox(density, settings.density; atol=0.001)
 
         # Condition
         condition_tresh = 2
-        @test cond(matrix) < condition_tresh
+        @test MatrixValidator.condition(matrix) < condition_tresh
 
-        # LU-decomposable
-        @test try lu(matrix)
-            true
-        catch
-            false
-        end
+        # LU-decomposability
+        @test MatrixValidator.is_lu_decomposable(matrix)
 
-        # Solving
-        rhs = Generator.generate_rhs_vector(matrix)
+        # Solving and rhs generation
+        rhs = Generator.generate_rhs_vector(matrix; prefered_solution=ones(Float64, size(matrix, 1)))
         x = matrix \ rhs
-        @test !any(value-> value < 1-1e-8 || value > 1+1e-8, x) # TODO: replace hardcoded solution by variable solution
+        tolerance = 1e-8
+        @test all(value -> isapprox(value, 1.0; atol=tolerance), x)
 
         # Random seed
         @test matrix == Generator.generate_matrix(settings) # Reproducability
@@ -101,7 +98,7 @@ using Suppressor
             seed = settings.seed + 1
         )
 
-        @test matrix != Generator.generate_matrix(new_settings)
+        @test matrix != Generator.generate_matrix(new_settings) # Randomness
 
     end
 end # testset "CAMNAS"
