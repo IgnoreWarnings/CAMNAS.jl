@@ -30,9 +30,9 @@ end
 @kwdef struct Settings
     dimension::UInt
     density::Float64
-    magnitude_off::Float64
-    delta::Float64
-    seed::UInt
+    magnitude_off::Float64 = 0.05
+    delta::Float64 = 0.5
+    seed::UInt = rand(UInt)
 end
 
 function generate_matrix(settings::Settings)
