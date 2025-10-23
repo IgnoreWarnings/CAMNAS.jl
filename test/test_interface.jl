@@ -59,7 +59,7 @@ begin # Initialization
         include("Generator.jl")
         dimension::UInt = 3
         matrix = Generator.generate_matrix(dimension)
-        csr_matrix = Generator.to_csr(matrix)
+        csr_matrix = Generator.to_zerobased_csr(matrix)
         rhs_vector = Generator.generate_rhs_vector(matrix) # assign directly
 
         Generator.to_files(csr_matrix, rhs_vector)
@@ -96,97 +96,3 @@ begin # Cleanup step
     cleanup()
 end # end Cleanup
 
-begin # Benchmark
-    include("Generator.jl")
-
-    using BenchmarkTools
-    using CSV, DataFrames
-
-    # Benchmark parameters
-    BenchmarkTools.DEFAULT_PARAMETERS.samples = 3
-    accelerators = [CAMNAS.NoAccelerator(), CAMNAS.CUDAccelerator()]
-    dimensions = UInt[1000:500:2000...]
-    densities = Float64[0.01:0.01:0.3...]
-
-    # Disable debug information during benchmark
-    saved_debug_env = ENV["JULIA_DEBUG"]
-    ENV["JULIA_DEBUG"] = "" # Disable debug output
-
-    # Create folder for benchmark results
-    benchmarkPath = "$(@__DIR__)/../benchmark"
-    mkpath(benchmarkPath)
-    
-    for dimension in dimensions
-        for density in densities
-            # Generate Test Matrixes and RHS vectors
-            print("Generating...")
-            matrix = Generator.generate_matrix(dimension; density=density)
-            csr_matrix = Generator.to_csr(matrix)
-            rhs_vector = Generator.generate_rhs_vector(matrix)
-            matrix_path = "$benchmarkPath/system_matrix_($dimension)_($density).txt"
-            rhs_path = "$benchmarkPath/rhs_($dimension)_($density).txt"
-            Generator.to_files(csr_matrix, rhs_vector; 
-                                matrix_path=matrix_path,
-                                rhs_path=rhs_path)
-            println("Done.")
-
-            for (i,accelerator) in enumerate(accelerators)
-                # Set accelerator
-                CAMNAS.set_accelerator!(accelerator)
-                println("Benchmarking: $(CAMNAS.accelerator) on $dimension x $dimension with density=$density")
-
-                system_matrix = read_input(ArrayPath(matrix_path))
-                rhs_vector = read_input(VectorPath(rhs_path))
-
-                GC.enable(false)
-                
-                # Decomposition
-                system_matrix_ptr = pointer_from_objref(system_matrix)
-                decomp_elapses = @belapsed decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, system_matrix_ptr))
-
-                # Solving
-                lhs_vector = zeros(Float64, length(rhs_vector))
-                solve_elapses = @elapsed solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_vector), Base.unsafe_convert(Ptr{Cdouble}, lhs_vector))
-                
-                GC.enable(true)
-
-                data_frame = DataFrame(accelerator = [accelerator], dimension = [dimension], density = [density], decomp_elapses = [decomp_elapses], solve_elapses = [solve_elapses] )
-                append = isfile("$benchmarkPath/data.csv") # with append no header is written
-                CSV.write("$benchmarkPath/data.csv", data_frame; append=append)
-
-                println(" Done.")
-            end
-        end
-
-    end
-
-    ENV["JULIA_DEBUG"] = saved_debug_env # Restore env setting
-end
-
-begin # Plot
-    using Plotly
-    using CSV, DataFrames
-
-    dimension = 1500
-
-    benchmarkPath = "$(@__DIR__)/../benchmark"
-    csv = CSV.read("$benchmarkPath/data.csv", DataFrame)
-
-    filtered = filter(row -> row.accelerator == "CAMNAS.NoAccelerator()" && row.dimension == dimension, csv)
-
-    cpu_trace = scatter(x=filtered.density,
-                        y=filtered.decomp_elapses, 
-                        mode="lines", 
-                        name="CAMNAS.NoAccelerator()")
-
-    filtered = filter(row -> row.accelerator == "CAMNAS.CUDAccelerator()" && row.dimension == dimension, csv)
-
-    gpu_trace = scatter(x=filtered.density,
-                        y=filtered.decomp_elapses, 
-                        mode="lines", 
-                        name="CAMNAS.CUDAccelerator()")
-
-    PlotlyJS.display(plot([cpu_trace, gpu_trace], Layout(title="Solvestep of $dimension",
-                                    xaxis=attr(title="Density"),
-                                    yaxis=attr(title="Time"))))
-end
