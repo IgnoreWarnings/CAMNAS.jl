@@ -50,7 +50,7 @@ function generate_rhs_vector(matrix::Matrix{Float64}; prefered_solution::Vector{
     return rhs_vector
 end
 
-function to_csr(matrix)
+function to_zerobased_csr(matrix)
     csr = SparseMatrixCSR(matrix)
     csr.colval .-= 1  # Convert column indices to 0-based
     csr.rowptr .-= 1  # Convert row pointers to 0-based
