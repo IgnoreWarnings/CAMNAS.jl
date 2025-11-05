@@ -5,15 +5,11 @@ using Base
 using BenchmarkTools
 using CSV, DataFrames
 using SparseMatricesCSR
-using ExprTools
-
-include("Generator.jl")
-using .Generator
 
 macro no_logging(func)
     quote
         # Save Environment
-        saved_debug_env = ENV["JULIA_DEBUG"]
+        saved_debug_env = get(ENV, "JULIA_DEBUG", "") # Use default value if not found
         ENV["JULIA_DEBUG"] = "" # Disable debug information during execution
 
         # Evaluate function
@@ -72,55 +68,6 @@ function benchmark(matrix_path::AbstractString, rhs_path::AbstractString, accele
     dpsim_matrix = read_input(ArrayPath(matrix_path))
     rhs_vector = read_input(VectorPath(rhs_path))
     benchmark(dpsim_matrix, rhs_vector,  accelerator; samples = samples)
-end
-
-function test()
-    settings = Generator.Settings(
-        dimension = 1000,
-        density = 0.01,
-        seed = 1337
-    )
-
-    matrix = Generator.generate_matrix(settings)
-    #print(matrix)
-    rhs_vector = Generator.generate_rhs_vector(matrix)
-
-    cpu = benchmark(matrix, rhs_vector, CAMNAS.NoAccelerator())
-    print(cpu)
-
-    gpu = benchmark(matrix, rhs_vector, CAMNAS.CUDAccelerator())
-    print(gpu)
-
-    # cpu = benchmark("/home/bauer/Codebase/CAMNAS.jl/benchmark/system_matrix_(500)_(0.1).txt",
-    #                 "/home/bauer/Codebase/CAMNAS.jl/benchmark/rhs_(500)_(0.1).txt", 
-    #                 CAMNAS.NoAccelerator())
-    # print(cpu)
-
-    #     for matrix in matrices
-    #         for accelerator in accelerators
-    #             measure_accelerator(accelerator, matrix, rhs_vector)
-    #         end
-    #     end
-
-    # for dimension in dimensions
-    #     for density in densities
-    #         # Generate Test Matrixes and RHS vectors
-    #         print("Generating...")
-    #         matrix = Generator.generate_matrix(dimension; density=density)
-    #         csr_matrix = Generator.to_csr(matrix)
-    #         rhs_vector = Generator.generate_rhs_vector(matrix)
-    #         matrix_path = "$benchmarkPath/system_matrix_($dimension)_($density).txt"
-    #         rhs_path = "$benchmarkPath/rhs_($dimension)_($density).txt"
-    #         Generator.to_files(csr_matrix, rhs_vector; 
-    #                             matrix_path=matrix_path,
-    #                             rhs_path=rhs_path)
-    #         println("Done.")
-    #     end
-    # end
-end
-
-begin
-    test()
 end
 
 function write_csv(path::AbstractString, data_frame::DataFrame)
