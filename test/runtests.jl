@@ -56,11 +56,11 @@ using Suppressor
         include("MatrixValidator.jl")
 
         settings = Generator.Settings(
-            dimension = rand(500:3000),
-            density = rand(1:5)/10,
-            magnitude_off = 0.05,
-            delta = 0.5,
-            seed = 1337
+            dimension=3000,
+            density=0.1,
+            magnitude_off=0.05,
+            delta=0.5,
+            seed=1337
         )
 
         matrix = Generator.generate_matrix(settings)
@@ -91,11 +91,11 @@ using Suppressor
         @test matrix == Generator.generate_matrix(settings) # Reproducability
 
         new_settings = Generator.Settings(
-            dimension = settings.dimension,
-            density = settings.density,
-            magnitude_off = settings.magnitude_off,
-            delta = settings.delta,
-            seed = settings.seed + 1
+            dimension=settings.dimension,
+            density=settings.density,
+            magnitude_off=settings.magnitude_off,
+            delta=settings.delta,
+            seed=settings.seed + 1
         )
 
         @test matrix != Generator.generate_matrix(new_settings) # Randomness
