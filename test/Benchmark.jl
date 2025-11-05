@@ -30,16 +30,16 @@ end
     solve_elapses::Float64
 end
 
-function benchmark(dpsim_matrix::dpsim_csr_matrix, rhs_vector::Vector{Float64}, accelerator::CAMNAS.AbstractAccelerator; samples::UInt=UInt(3))
+@no_logging function benchmark(dpsim_matrix::dpsim_csr_matrix, rhs_vector::Vector{Float64}, accelerator::CAMNAS.AbstractAccelerator; samples::UInt=UInt(3))
     CAMNAS.set_accelerator!(accelerator)
 
     GC.enable(false)
-    system_matrix_ptr = Ref(dpsim_matrix)
-    GC.@preserve system_matrix_ptr begin
-        decomp_elapses = decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, system_matrix_ptr))
-        solve_elapses = @belapsed solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_vector),
-                                        Base.unsafe_convert(Ptr{Cdouble}, zeros(Float64, length(rhs_vector)))) evals = samples
-    end
+    system_matrix_ptr = pointer_from_objref(dpsim_matrix)
+    decomp_elapses = @belapsed decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, $system_matrix_ptr)) evals = samples
+    
+    solve_elapses = @belapsed solve(Base.unsafe_convert(Ptr{Cdouble}, $rhs_vector), 
+                                Base.unsafe_convert(Ptr{Cdouble}, 
+                                zeros(Float64, length($rhs_vector)))) evals = samples
     GC.enable(true)
 
     Result(
@@ -75,10 +75,8 @@ function benchmark(matrix_path::AbstractString, rhs_path::AbstractString, accele
 end
 
 function test()
-    GC.enable(false)
-
     settings = Generator.Settings(
-        dimension = 5,
+        dimension = 1000,
         density = 0.01,
         seed = 1337
     )
@@ -88,8 +86,10 @@ function test()
     rhs_vector = Generator.generate_rhs_vector(matrix)
 
     cpu = benchmark(matrix, rhs_vector, CAMNAS.NoAccelerator())
-    # print(cpu)
+    print(cpu)
 
+    gpu = benchmark(matrix, rhs_vector, CAMNAS.CUDAccelerator())
+    print(gpu)
 
     # cpu = benchmark("/home/bauer/Codebase/CAMNAS.jl/benchmark/system_matrix_(500)_(0.1).txt",
     #                 "/home/bauer/Codebase/CAMNAS.jl/benchmark/rhs_(500)_(0.1).txt", 
@@ -119,10 +119,9 @@ function test()
     # end
 end
 
-# begin
-#     GC.enable(false)
-#     test()
-# end
+begin
+    test()
+end
 
 function write_csv(path::AbstractString, data_frame::DataFrame)
     # Create folder for benchmark results
