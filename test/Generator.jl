@@ -50,13 +50,6 @@ function generate_rhs_vector(matrix::Matrix{Float64}; prefered_solution::Vector{
     return rhs_vector
 end
 
-function to_zerobased_csr(matrix)
-    csr = SparseMatrixCSR(matrix)
-    csr.colval .-= 1  # Convert column indices to 0-based
-    csr.rowptr .-= 1  # Convert row pointers to 0-based
-    return csr
-end
-
 function to_files(csr::SparseMatrixCSR, rhs_vector::Vector{Float64}; matrix_path="$(@__DIR__)/system_matrix_generated.txt", rhs_path="$(@__DIR__)/rhs_generated.txt")
     # write matrix to file
     io = open(matrix_path, "w");                                                                                                                                                                                                                                                                                                                                               

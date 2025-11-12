@@ -63,7 +63,7 @@ function benchmark(csr::SparseMatrixCSR, rhs_vector::Vector{Float64}, accelerato
 end
 
 function benchmark(matrix::Matrix, rhs_vector::Vector{Float64}, accelerator::CAMNAS.AbstractAccelerator; samples::UInt=UInt(3))
-    csr = Generator.to_zerobased_csr(matrix)
+    csr = Utils.to_zerobased_csr(matrix)
     benchmark(csr, rhs_vector,  accelerator; samples = samples)
 end
 

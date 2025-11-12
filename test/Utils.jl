@@ -1,9 +1,17 @@
 module Utils
 
 using CAMNAS
+using SparseMatricesCSR
 
 struct ArrayPath path::String end
 struct VectorPath path::String end
+
+function to_zerobased_csr(matrix)
+    csr = SparseMatrixCSR(matrix)
+    csr.colval .-= 1  # Convert column indices to 0-based
+    csr.rowptr .-= 1  # Convert row pointers to 0-based
+    return csr
+end
 
 function read_input(path::ArrayPath)
     # Read system matrix from file
