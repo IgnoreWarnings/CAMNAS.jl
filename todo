@@ -1,0 +1,12 @@
+] activate .
+] test
+
+auto formatting
+git igonre formatting
+
+benchmark module
+    benchmark
+        - dont write to file but return result
+
+    plotting
+        folder arg

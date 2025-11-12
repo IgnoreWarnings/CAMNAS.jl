@@ -6,6 +6,9 @@ using BenchmarkTools
 using CSV, DataFrames
 using SparseMatricesCSR
 
+include("Utils.jl")
+using .Utils
+
 macro no_logging(func)
     quote
         # Save Environment
@@ -65,8 +68,8 @@ function benchmark(matrix::Matrix, rhs_vector::Vector{Float64}, accelerator::CAM
 end
 
 function benchmark(matrix_path::AbstractString, rhs_path::AbstractString, accelerator::CAMNAS.AbstractAccelerator; samples::UInt=UInt(3))
-    dpsim_matrix = read_input(ArrayPath(matrix_path))
-    rhs_vector = read_input(VectorPath(rhs_path))
+    dpsim_matrix = Utils.read_input(Utils.ArrayPath(matrix_path))
+    rhs_vector = Utils.read_input(Utils.VectorPath(rhs_path))
     benchmark(dpsim_matrix, rhs_vector,  accelerator; samples = samples)
 end
 
