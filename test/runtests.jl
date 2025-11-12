@@ -18,89 +18,89 @@ using Suppressor
         parse(Int32, sys_mat_str[4]),
         parse(Int32, sys_mat_str[5])
     )
-    # sys_mat_ptr = pointer_from_objref(sys_mat)
+    sys_mat_ptr = pointer_from_objref(sys_mat)
 
-    # rhs_vec_strings = readlines("rhs_small.txt")
-    # rhs_vec_strings = replace.(rhs_vec_strings, r"[\[\],]" => "")
-    # rhs_vec = parse.(Float64, split(rhs_vec_strings[1]))
+    rhs_vec_strings = readlines("rhs_small.txt")
+    rhs_vec_strings = replace.(rhs_vec_strings, r"[\[\],]" => "")
+    rhs_vec = parse.(Float64, split(rhs_vec_strings[1]))
 
-    # lhs_vec = zeros(Float64, length(rhs_vec))
+    lhs_vec = zeros(Float64, length(rhs_vec))
 
-    # @testset "Initialization" begin
-    #     @test init(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, sys_mat_ptr)) == 0
-    # end 
+    @testset "Initialization" begin
+        @test init(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, sys_mat_ptr)) == 0
+    end 
 
-    # @testset "Solving" begin
-    #     @test solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_vec), Base.unsafe_convert(Ptr{Cdouble}, lhs_vec)) == 0
-    #     @test lhs_vec == [1.0, 1/2, 1/3]
-    # end
+    @testset "Solving" begin
+        @test solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_vec), Base.unsafe_convert(Ptr{Cdouble}, lhs_vec)) == 0
+        @test lhs_vec == [1.0, 1/2, 1/3]
+    end
 
-    # @testset "Decomposition" begin
-    #     # Change system matrix values
-    #     sys_mat_bak = sys_mat.values
-    #     sys_mat.values = Base.unsafe_convert(Ptr{Cdouble}, [4.0, 5.0, 6.0])
+    @testset "Decomposition" begin
+        # Change system matrix values
+        sys_mat_bak = sys_mat.values
+        sys_mat.values = Base.unsafe_convert(Ptr{Cdouble}, [4.0, 5.0, 6.0])
 
-    #     # Decompose new system matrix
-    #     @test decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, sys_mat_ptr)) == 0
+        # Decompose new system matrix
+        @test decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, sys_mat_ptr)) == 0
 
-    #     # Solve system with new matrix
-    #     @test solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_vec), Base.unsafe_convert(Ptr{Cdouble}, lhs_vec)) == 0
-    #     @test lhs_vec == [1/4, 1/5, 1/6]
+        # Solve system with new matrix
+        @test solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_vec), Base.unsafe_convert(Ptr{Cdouble}, lhs_vec)) == 0
+        @test lhs_vec == [1/4, 1/5, 1/6]
 
-    #     # Restore system matrix values
-    #     sys_mat.values = sys_mat_bak
-    # end        
+        # Restore system matrix values
+        sys_mat.values = sys_mat_bak
+    end        
 
-    # @testset "Generator" begin
-    #     include("Generator.jl")
-    #     include("MatrixValidator.jl")
+    @testset "Generator" begin
+        include("Generator.jl")
+        include("MatrixValidator.jl")
 
-    #     settings = Generator.Settings(
-    #         dimension=3000,
-    #         density=0.1,
-    #         magnitude_off=0.05,
-    #         delta=0.5,
-    #         seed=1337
-    #     )
+        settings = Generator.Settings(
+            dimension=3000,
+            density=0.1,
+            magnitude_off=0.05,
+            delta=0.5,
+            seed=1337
+        )
 
-    #     matrix = Generator.generate_matrix(settings)
+        matrix = Generator.generate_matrix(settings)
 
-    #     # Dimensions
-    #     @test MatrixValidator.is_quadratic(matrix)
-    #     @test MatrixValidator.m(matrix) == settings.dimension
-    #     @test MatrixValidator.n(matrix) == settings.dimension
+        # Dimensions
+        @test MatrixValidator.is_quadratic(matrix)
+        @test MatrixValidator.m(matrix) == settings.dimension
+        @test MatrixValidator.n(matrix) == settings.dimension
 
-    #     # Density
-    #     density = MatrixValidator.density(matrix)
-    #     @test isapprox(density, settings.density; atol=0.001)
+        # Density
+        density = MatrixValidator.density(matrix)
+        @test isapprox(density, settings.density; atol=0.001)
 
-    #     # Condition
-    #     condition_tresh = 2
-    #     @test MatrixValidator.condition(matrix) < condition_tresh
+        # Condition
+        condition_tresh = 2
+        @test MatrixValidator.condition(matrix) < condition_tresh
 
-    #     # LU-decomposability
-    #     @test MatrixValidator.is_lu_decomposable(matrix)
+        # LU-decomposability
+        @test MatrixValidator.is_lu_decomposable(matrix)
 
-    #     # Solving and rhs generation
-    #     rhs = Generator.generate_rhs_vector(matrix; prefered_solution=ones(Float64, size(matrix, 1)))
-    #     x = matrix \ rhs
-    #     tolerance = 1e-8
-    #     @test all(value -> isapprox(value, 1.0; atol=tolerance), x)
+        # Solving and rhs generation
+        rhs = Generator.generate_rhs_vector(matrix; prefered_solution=ones(Float64, size(matrix, 1)))
+        x = matrix \ rhs
+        tolerance = 1e-8
+        @test all(value -> isapprox(value, 1.0; atol=tolerance), x)
 
-    #     # Random seed
-    #     @test matrix == Generator.generate_matrix(settings) # Reproducability
+        # Random seed
+        @test matrix == Generator.generate_matrix(settings) # Reproducability
 
-    #     new_settings = Generator.Settings(
-    #         dimension=settings.dimension,
-    #         density=settings.density,
-    #         magnitude_off=settings.magnitude_off,
-    #         delta=settings.delta,
-    #         seed=settings.seed + 1
-    #     )
+        new_settings = Generator.Settings(
+            dimension=settings.dimension,
+            density=settings.density,
+            magnitude_off=settings.magnitude_off,
+            delta=settings.delta,
+            seed=settings.seed + 1
+        )
 
-    #     @test matrix != Generator.generate_matrix(new_settings) # Randomness
+        @test matrix != Generator.generate_matrix(new_settings) # Randomness
 
-    # end
+    end
 
     @testset "Benchmark" begin
         include("Benchmark.jl")
