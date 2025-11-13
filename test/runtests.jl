@@ -110,8 +110,7 @@ using Suppressor
         include("Generator.jl")
 
         # from files
-        @test Benchmark.benchmark("system_matrix_small.txt", "rhs_small.txt",
-            CAMNAS.NoAccelerator()) isa Benchmark.BenchmarkResult
+        @test Benchmark.benchmark("system_matrix_small.txt", "rhs_small.txt") isa Benchmark.BenchmarkResult
 
         # gerator matrix
         settings = Generator.Settings(
@@ -121,10 +120,10 @@ using Suppressor
         )
         matrix = Generator.generate_matrix(settings)
         rhs_vector = Generator.generate_rhs_vector(matrix)
-        @test Benchmark.benchmark(matrix, rhs_vector, CAMNAS.NoAccelerator()) isa Benchmark.BenchmarkResult
+        @test Benchmark.benchmark(matrix, rhs_vector) isa Benchmark.BenchmarkResult
 
         # CUDA accelerator
-        @test Benchmark.benchmark(matrix, rhs_vector, CAMNAS.CUDAccelerator()) isa Benchmark.BenchmarkResult #skip=!hasCudaAccelerator
+        @test Benchmark.benchmark(matrix, rhs_vector) isa Benchmark.BenchmarkResult #skip=!hasCudaAccelerator
 
     end
 end # testset "CAMNAS"

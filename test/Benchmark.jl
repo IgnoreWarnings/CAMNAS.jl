@@ -29,9 +29,7 @@ end
     solve_elapses::Float64
 end
 
-@no_logging function benchmark(dpsim_matrix::dpsim_csr_matrix, rhs_vector::Vector{Float64}, accelerator::CAMNAS.AbstractAccelerator; samples::UInt=UInt(3))
-    CAMNAS.set_accelerator!(accelerator)
-
+@no_logging function benchmark(dpsim_matrix::dpsim_csr_matrix, rhs_vector::Vector{Float64}; samples::UInt=UInt(3))
     GC.enable(false)
     system_matrix_ptr = pointer_from_objref(dpsim_matrix)
     decomp_elapses = @belapsed decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, $system_matrix_ptr)) evals = samples
@@ -57,29 +55,34 @@ function csr_to_dpsim(csr::SparseMatrixCSR)
     )
 end
 
-function benchmark(csr::SparseMatrixCSR, rhs_vector::Vector{Float64}, accelerator::CAMNAS.AbstractAccelerator; samples::UInt=UInt(3))
+function benchmark(csr::SparseMatrixCSR, rhs_vector::Vector{Float64}; samples::UInt=UInt(3))
     dpsim_matrix = csr_to_dpsim(csr)
-    benchmark(dpsim_matrix, rhs_vector,  accelerator; samples = samples)
+    benchmark(dpsim_matrix, rhs_vector; samples = samples)
 end
 
-function benchmark(matrix::Matrix, rhs_vector::Vector{Float64}, accelerator::CAMNAS.AbstractAccelerator; samples::UInt=UInt(3))
+function benchmark(matrix::Matrix, rhs_vector::Vector{Float64}; samples::UInt=UInt(3))
     csr = Utils.to_zerobased_csr(matrix)
-    benchmark(csr, rhs_vector,  accelerator; samples = samples)
+    benchmark(csr, rhs_vector; samples = samples)
 end
 
-function benchmark(matrix_path::AbstractString, rhs_path::AbstractString, accelerator::CAMNAS.AbstractAccelerator; samples::UInt=UInt(3))
+function benchmark(matrix_path::AbstractString, rhs_path::AbstractString; samples::UInt=UInt(3))
     dpsim_matrix = Utils.read_input(Utils.ArrayPath(matrix_path))
     rhs_vector = Utils.read_input(Utils.VectorPath(rhs_path))
-    benchmark(dpsim_matrix, rhs_vector,  accelerator; samples = samples)
+    benchmark(dpsim_matrix, rhs_vector; samples = samples)
 end
 
-function write_csv(path::AbstractString, data_frame::DataFrame)
-    # Create folder for benchmark results
-    benchmarkPath = "$(@__DIR__)/$path"
-    mkpath(benchmarkPath)
+function save_csv(path::AbstractString, matrix_path::String, benchmark_result::BenchmarkResult)
+    data_frame = DataFrame(
+        decomp_elapses=[benchmark_result.decomp_elapses],
+        solve_elapses=[benchmark_result.solve_elapses],
+        matrix=[matrix_path]
+    )
 
-    append = isfile("$path/data.csv") # with append no header is written
-    CSV.write("$path/data.csv", data_frame; append=append)
+    # Create folder for csv
+    mkpath(path)
+
+    append = isfile("$path") # with append no header is written
+    CSV.write("$path", data_frame; append=append)
 end
 
 # begin # Plot
