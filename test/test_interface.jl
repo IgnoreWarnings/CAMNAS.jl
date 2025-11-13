@@ -25,12 +25,18 @@ begin # Initialization
 
     if inputValues == "generated"
         include("Generator.jl")
+
+        # Generate test matrix
         dimension::UInt = 3
         matrix = Generator.generate_matrix(dimension)
-        csr_matrix = Generator.to_zerobased_csr(matrix)
-        rhs_vector = Generator.generate_rhs_vector(matrix) # assign directly
 
-        Generator.to_files(csr_matrix, rhs_vector)
+        # matrix to file
+        csr_matrix = Generator.to_zerobased_csr(matrix)
+Generator.matrix_to_file(csr_matrix)
+
+        # rhs to file
+        rhs_vector = Generator.generate_rhs_vector(matrix) # assign directly
+        Generator.rhs_to_file(rhs_vector)
     end
 
     system_matrix = Utils.read_input(ArrayPath("$(@__DIR__)/system_matrix_$inputValues.txt"))
