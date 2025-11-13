@@ -24,7 +24,7 @@ macro no_logging(func)
     end
 end
 
-@kwdef struct Result
+@kwdef struct BenchmarkResult
     decomp_elapses::Float64
     solve_elapses::Float64
 end
@@ -41,7 +41,7 @@ end
                                 zeros(Float64, length($rhs_vector)))) evals = samples
     GC.enable(true)
 
-    Result(
+    BenchmarkResult(
         decomp_elapses,
         solve_elapses
     )
