@@ -3,8 +3,12 @@ module Utils
 using CAMNAS
 using SparseMatricesCSR
 
-struct ArrayPath path::String end
-struct VectorPath path::String end
+struct ArrayPath
+    path::String
+end
+struct VectorPath
+    path::String
+end
 
 function to_zerobased_csr(matrix)
     csr = SparseMatrixCSR(matrix)
