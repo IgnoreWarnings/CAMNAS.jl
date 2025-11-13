@@ -50,14 +50,14 @@ function generate_rhs_vector(matrix::Matrix{Float64}; prefered_solution::Vector{
     return rhs_vector
 end
 
-function to_files(csr::SparseMatrixCSR, rhs_vector::Vector{Float64}; matrix_path="$(@__DIR__)/system_matrix_generated.txt", rhs_path="$(@__DIR__)/rhs_generated.txt")
-    # write matrix to file
+function matrix_to_file(csr::SparseMatrixCSR; matrix_path="$(@__DIR__)/system_matrix_generated.txt")
     io = open(matrix_path, "w");                                                                                                                                                                                                                                                                                                                                               
     write(io, "$(csr.nzval)\n$(csr.rowptr)\n$(csr.colval)\n$(csr.m)\n$(length(csr.nzval))");                                                                                                                                                                                                                                                                                                                                                
     close(io); 
+end
 
-    # write rhs vector to file
-    io = open(rhs_path, "w");   
+function rhs_to_file(rhs_vector::Vector{Float64}; rhs_path="$(@__DIR__)/rhs_generated.txt")
+    io = open(rhs_path, "w");
     write(io, "$(rhs_vector)");
     close(io);
 end
