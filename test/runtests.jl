@@ -52,6 +52,8 @@ using Suppressor
     end        
 
     @testset "Generator" begin
+        pre_seed = 1337
+
         include("Generator.jl")
         include("MatrixValidator.jl")
 
@@ -60,7 +62,7 @@ using Suppressor
             density=0.1,
             magnitude_off=0.05,
             delta=0.5,
-            seed=1337
+            seed=pre_seed
         )
 
         matrix = Generator.generate_matrix(settings)
@@ -103,43 +105,27 @@ using Suppressor
     end
 
     @testset "Benchmark" begin
+        pre_seed = 1337
         include("Benchmark.jl")
         include("Generator.jl")
 
-        cpu = Benchmark.benchmark("/home/bauer/Codebase/CAMNAS.jl/benchmark/system_matrix_(2000)_(0.1).txt",
-            "/home/bauer/Codebase/CAMNAS.jl/benchmark/rhs_(2000)_(0.1).txt",
-            CAMNAS.NoAccelerator())
-        print(cpu)
+        # from files
+        @test Benchmark.benchmark("system_matrix_small.txt", "rhs_small.txt",
+            CAMNAS.NoAccelerator()) isa Benchmark.BenchmarkResult
 
+        # gerator matrix
         settings = Generator.Settings(
-            dimension=4000,
+            dimension=300,
             density=0.01,
-            seed=1337
+            seed=pre_seed
         )
-
         matrix = Generator.generate_matrix(settings)
         rhs_vector = Generator.generate_rhs_vector(matrix)
+        @test Benchmark.benchmark(matrix, rhs_vector, CAMNAS.NoAccelerator()) isa Benchmark.BenchmarkResult
 
-        accelerators = [CAMNAS.NoAccelerator(), CAMNAS.CUDAccelerator()]
-        for accelerator in accelerators
-            Benchmark.benchmark(matrix, rhs_vector, accelerator)
-        end
+        # CUDA accelerator
+        @test Benchmark.benchmark(matrix, rhs_vector, CAMNAS.CUDAccelerator()) isa Benchmark.BenchmarkResult #skip=!hasCudaAccelerator
 
-        # for dimension in dimensions
-        #     for density in densities
-        #         # Generate Test Matrixes and RHS vectors
-        #         print("Generating...")
-        #         matrix = Generator.generate_matrix(dimension; density=density)
-        #         csr_matrix = Generator.to_csr(matrix)
-        #         rhs_vector = Generator.generate_rhs_vector(matrix)
-        #         matrix_path = "$benchmarkPath/system_matrix_($dimension)_($density).txt"
-        #         rhs_path = "$benchmarkPath/rhs_($dimension)_($density).txt"
-        #         Generator.to_files(csr_matrix, rhs_vector;
-        #             matrix_path=matrix_path,
-        #             rhs_path=rhs_path)
-        #         println("Done.")
-        #     end
-        # end
     end
 end # testset "CAMNAS"
 
