@@ -51,12 +51,16 @@ function generate_rhs_vector(matrix::Matrix{Float64}; prefered_solution::Vector{
 end
 
 function matrix_to_file(csr::SparseMatrixCSR; matrix_path="$(@__DIR__)/system_matrix_generated.txt")
+    mkpath(dirname(matrix_path))
+
     io = open(matrix_path, "w");                                                                                                                                                                                                                                                                                                                                               
     write(io, "$(csr.nzval)\n$(csr.rowptr)\n$(csr.colval)\n$(csr.m)\n$(length(csr.nzval))");                                                                                                                                                                                                                                                                                                                                                
     close(io); 
 end
 
 function rhs_to_file(rhs_vector::Vector{Float64}; rhs_path="$(@__DIR__)/rhs_generated.txt")
+    mkpath(dirname(rhs_path))
+
     io = open(rhs_path, "w");
     write(io, "$(rhs_vector)");
     close(io);
