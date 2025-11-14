@@ -5,31 +5,24 @@ using Base
 using BenchmarkTools
 using CSV, DataFrames
 using SparseMatricesCSR
+using Logging
 
 include("Utils.jl")
 using .Utils
-
-macro no_logging(func)
-    quote
-        # Save Environment
-        saved_debug_env = get(ENV, "JULIA_DEBUG", "") # Use default value if not found
-        ENV["JULIA_DEBUG"] = "" # Disable debug information during execution
-
-        # Evaluate function
-        result = $(esc(func))
-
-        # Restore environment
-        ENV["JULIA_DEBUG"] = saved_debug_env
-        return result
-    end
-end
 
 @kwdef struct BenchmarkResult
     decomp_elapses::Float64
     solve_elapses::Float64
 end
 
-@no_logging function benchmark(dpsim_matrix::dpsim_csr_matrix, rhs_vector::Vector{Float64}; samples::UInt=UInt(3))
+function benchmark(dpsim_matrix::dpsim_csr_matrix, rhs_vector::Vector{Float64}; samples::UInt=UInt(3))
+    # Save the current global logger
+    current_logger = global_logger()
+
+    # Save Environment
+    saved_debug_env = get(ENV, "JULIA_DEBUG", "") # Use default value if not found
+    ENV["JULIA_DEBUG"] = "" # Disable debug information during execution
+
     GC.enable(false)
     system_matrix_ptr = pointer_from_objref(dpsim_matrix)
     decomp_elapses = @belapsed decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, $system_matrix_ptr)) evals = samples
@@ -38,6 +31,9 @@ end
                                 Base.unsafe_convert(Ptr{Cdouble}, 
                                 zeros(Float64, length($rhs_vector)))) evals = samples
     GC.enable(true)
+
+    # Restore the previous env
+    ENV["JULIA_DEBUG"] = saved_debug_env
 
     BenchmarkResult(
         decomp_elapses,
@@ -79,38 +75,10 @@ function save_csv(path::AbstractString, matrix_path::String, benchmark_result::B
     )
 
     # Create folder for csv
-    mkpath(path)
+    mkpath(dirname("$path"))
 
     append = isfile("$path") # with append no header is written
     CSV.write("$path", data_frame; append=append)
 end
-
-# begin # Plot
-#     using Plotly
-#     using CSV, DataFrames
-
-#     dimension = 1500
-
-#     benchmarkPath = "$(@__DIR__)/../benchmark"
-#     csv = CSV.read("$benchmarkPath/data.csv", DataFrame)
-
-#     filtered = filter(row -> row.accelerator == "CAMNAS.NoAccelerator()" && row.dimension == dimension, csv)
-
-#     cpu_trace = scatter(x=filtered.density,
-#                         y=filtered.decomp_elapses, 
-#                         mode="lines", 
-#                         name="CAMNAS.NoAccelerator()")
-
-#     filtered = filter(row -> row.accelerator == "CAMNAS.CUDAccelerator()" && row.dimension == dimension, csv)
-
-#     gpu_trace = scatter(x=filtered.density,
-#                         y=filtered.decomp_elapses, 
-#                         mode="lines", 
-#                         name="CAMNAS.CUDAccelerator()")
-
-#     PlotlyJS.display(plot([cpu_trace, gpu_trace], Layout(title="Solvestep of $dimension",
-#                                     xaxis=attr(title="Density"),
-#                                     yaxis=attr(title="Time"))))
-# end
 
 end

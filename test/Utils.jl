@@ -6,6 +6,7 @@ using SparseMatricesCSR
 struct ArrayPath
     path::String
 end
+
 struct VectorPath
     path::String
 end

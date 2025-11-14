@@ -1,10 +1,21 @@
 ] activate .
 ] test
 
-auto formatting
-git ignore formatting
-
-plotting
-    folder arg
+runtimeswitch = true
 
 saving
+    add warning if file exists
+plotting
+hasCudaAccelerator()
+
+auto formatting
+    -vscode config mit autosave formatting
+
+git ignore formatting
+ci runtests, check formatting, check signoff
+
+docstrings
+git aufrauemen
+
+bugs:
+path convention of read input determines read type
