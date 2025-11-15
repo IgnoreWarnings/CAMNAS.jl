@@ -5,7 +5,6 @@ using Base
 using BenchmarkTools
 using CSV, DataFrames
 using SparseMatricesCSR
-using Logging
 
 include("Utils.jl")
 using .Utils
@@ -16,9 +15,6 @@ using .Utils
 end
 
 function benchmark(dpsim_matrix::dpsim_csr_matrix, rhs_vector::Vector{Float64}; samples::UInt=UInt(3))
-    # Save the current global logger
-    current_logger = global_logger()
-
     # Save Environment
     saved_debug_env = get(ENV, "JULIA_DEBUG", "") # Use default value if not found
     ENV["JULIA_DEBUG"] = "" # Disable debug information during execution
