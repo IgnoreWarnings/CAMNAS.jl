@@ -26,8 +26,8 @@ begin # Initialization
         include("Generator.jl")
 
         # Generate test matrix
-        dimension::UInt = 3
-        matrix = Generator.generate_matrix(dimension)
+        generator_settings = Generator.Settings(dimension=3, density=0.01)
+        matrix = Generator.generate_matrix(generator_settings)
 
         # matrix to file
         csr_matrix = Utils.to_zerobased_csr(matrix)
@@ -108,6 +108,9 @@ begin # Benchmark performance test
         # Benchmark system performance
         accelerators = [CAMNAS.NoAccelerator()] #, CAMNAS.CUDAccelerator()]
         # CAMNAS.accelerators_vector
+        #TODO: fix case CAMNAS.hasAccelerator()
+        print(CAMNAS.current_accelerator)
+        #CAMNAS.update_varDict!(Dict("allow_strategies"=>true, )
         # CAMNAS.update_varDict!(["allow_strategies","specific_accelerator_strategy","specific_accelerator"],[true,true,"Tesla P40"])
         for accelerator in accelerators
             print("$accelerator running $(generator_setting.dimension) with density $(generator_setting.density) ... ")
