@@ -6,7 +6,7 @@ using LinearAlgebra
 using Base
 
 # Note: Density is rounded and not precicse.
-function generate_matrix(dimension::UInt; density::Float64 = 0.01, magnitude_off::Float64 = 0.05, delta::Float64 = 0.5, seed=rand(UInt))
+function generate_matrix(dimension::UInt; density::Float64=0.01, magnitude_off::Float64=0.05, delta::Float64=0.5, seed=rand(UInt))
     Random.seed!(seed)
     matrix = zeros(Float64, dimension, dimension)
 
@@ -18,7 +18,7 @@ function generate_matrix(dimension::UInt; density::Float64 = 0.01, magnitude_off
         for j in cols
             matrix[i, j] = rand() * 2magnitude_off - magnitude_off
         end
-    
+
         # diagonal dominance
         row_sum = sum(abs.(matrix[i, :]))
         matrix[i, i] = row_sum + delta
@@ -38,32 +38,32 @@ end
 function generate_matrix(settings::Settings)
     generate_matrix(
         settings.dimension,
-        density = settings.density,
-        magnitude_off = settings.magnitude_off,
-        delta = settings.delta,
-        seed = settings.seed
+        density=settings.density,
+        magnitude_off=settings.magnitude_off,
+        delta=settings.delta,
+        seed=settings.seed
     )
 end
 
-function generate_rhs_vector(matrix::Matrix{Float64}; prefered_solution::Vector{Float64} = ones(Float64, size(matrix, 1))) 
-    rhs_vector = matrix*prefered_solution
+function generate_rhs_vector(matrix::Matrix{Float64}; prefered_solution::Vector{Float64}=ones(Float64, size(matrix, 1)))
+    rhs_vector = matrix * prefered_solution
     return rhs_vector
 end
 
 function matrix_to_file(csr::SparseMatrixCSR; matrix_path="$(@__DIR__)/system_matrix_generated.txt")
     mkpath(dirname(matrix_path))
 
-    io = open(matrix_path, "w");                                                                                                                                                                                                                                                                                                                                               
-    write(io, "$(csr.nzval)\n$(csr.rowptr)\n$(csr.colval)\n$(csr.m)\n$(length(csr.nzval))");                                                                                                                                                                                                                                                                                                                                                
-    close(io); 
+    io = open(matrix_path, "w")
+    write(io, "$(csr.nzval)\n$(csr.rowptr)\n$(csr.colval)\n$(csr.m)\n$(length(csr.nzval))")
+    close(io)
 end
 
 function rhs_to_file(rhs_vector::Vector{Float64}; rhs_path="$(@__DIR__)/rhs_generated.txt")
     mkpath(dirname(rhs_path))
 
-    io = open(rhs_path, "w");
-    write(io, "$(rhs_vector)");
-    close(io);
+    io = open(rhs_path, "w")
+    write(io, "$(rhs_vector)")
+    close(io)
 end
 
 end
