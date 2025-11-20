@@ -108,13 +108,13 @@ begin # Benchmark performance test
         # Benchmark system performance
         accelerators = [CAMNAS.NoAccelerator()] #, CAMNAS.CUDAccelerator()]
         # CAMNAS.accelerators_vector
-        # CAMNAS.current_accelerator
         # CAMNAS.update_varDict!(["allow_strategies","specific_accelerator_strategy","specific_accelerator"],[true,true,"Tesla P40"])
         for accelerator in accelerators
             print("$accelerator running $(generator_setting.dimension) with density $(generator_setting.density) ... ")
             result = Benchmark.benchmark(matrix, rhs_vector)
-            Benchmark.save_csv("$benchmarkPath/test.csv", matrix_path, result) # TODO: save strat/env
-            print("done.")
+            strategy = "CAMNAS.current_accelerator"
+            Benchmark.save_csv("$benchmarkPath/test.csv", result, strategy, matrix_path) # TODO: save strat/env
+            println("done.")
         end
     end
 end
