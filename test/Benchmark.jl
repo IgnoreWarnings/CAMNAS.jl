@@ -1,3 +1,8 @@
+#=
+Author: Pascal Bauer <pascal.bauer@rwth-aachen.de>
+SPDX-FileCopyrightText: 2025 Pascal Bauer <pascal.bauer@rwth-aachen.de>
+=#
+
 module Benchmark
 
 using CAMNAS
@@ -34,6 +39,7 @@ This function benchmarks the currently active system configutaion by measuring l
 
 # Example
 ```julia
+```
 """
 function benchmark(dpsim_matrix::dpsim_csr_matrix, rhs_vector::Vector{Float64}; samples::UInt=UInt(3))
     # Save Environment
