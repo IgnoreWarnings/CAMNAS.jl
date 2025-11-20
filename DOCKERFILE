@@ -1,0 +1,16 @@
+FROM docker.io/library/julia:1.11.6-bullseye
+
+#WORKDIR /usr/src/app
+
+# install git
+#RUN apt-get update 
+#&& \
+#apt-get install -y git
+
+# julia ->
+# cd("/workspaces/bench/CAMNAS.jl/")
+# Pkg.update()
+# include("test/test_interface.jl")
+
+#RUN julia --project="/CAMNAS.jl" \
+          #-e "import Pkg; Pkg.instantiate()"
