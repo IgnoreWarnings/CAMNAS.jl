@@ -123,7 +123,7 @@ using Suppressor
         @test Benchmark.benchmark(matrix, rhs_vector) isa Benchmark.BenchmarkResult
 
         # CUDA accelerator
-        @test Benchmark.benchmark(matrix, rhs_vector) isa Benchmark.BenchmarkResult #skip=!hasCudaAccelerator
+        @test Benchmark.benchmark(matrix, rhs_vector) isa Benchmark.BenchmarkResult #TODO: skip=!hasCudaAccelerator
 
     end
 end # testset "CAMNAS"
