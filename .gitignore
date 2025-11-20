@@ -6,5 +6,4 @@ CAMNASCompiled
 *.data.*
 
 *_generated.txt
-benchmark
 testBenchmark

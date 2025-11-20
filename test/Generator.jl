@@ -1,3 +1,12 @@
+#=
+Author: Pascal Bauer <pascal.bauer@rwth-aachen.de>
+SPDX-FileCopyrightText: 2025 Pascal Bauer <pascal.bauer@rwth-aachen.de>
+=#
+
+"""
+This module adds functions to generate LR-decomposable matrices with specifiy density. 
+
+"""
 module Generator
 
 using Random
