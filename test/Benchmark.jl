@@ -22,10 +22,10 @@ function benchmark(dpsim_matrix::dpsim_csr_matrix, rhs_vector::Vector{Float64}; 
     GC.enable(false)
     system_matrix_ptr = pointer_from_objref(dpsim_matrix)
     decomp_elapses = @belapsed decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, $system_matrix_ptr)) evals = samples
-    
-    solve_elapses = @belapsed solve(Base.unsafe_convert(Ptr{Cdouble}, $rhs_vector), 
-                                Base.unsafe_convert(Ptr{Cdouble}, 
-                                zeros(Float64, length($rhs_vector)))) evals = samples
+
+    solve_elapses = @belapsed solve(Base.unsafe_convert(Ptr{Cdouble}, $rhs_vector),
+        Base.unsafe_convert(Ptr{Cdouble},
+            zeros(Float64, length($rhs_vector)))) evals = samples
     GC.enable(true)
 
     # Restore the previous env
@@ -49,25 +49,25 @@ end
 
 function benchmark(csr::SparseMatrixCSR, rhs_vector::Vector{Float64}; samples::UInt=UInt(3))
     dpsim_matrix = csr_to_dpsim(csr)
-    benchmark(dpsim_matrix, rhs_vector; samples = samples)
+    benchmark(dpsim_matrix, rhs_vector; samples=samples)
 end
 
 function benchmark(matrix::Matrix, rhs_vector::Vector{Float64}; samples::UInt=UInt(3))
     csr = Utils.to_zerobased_csr(matrix)
-    benchmark(csr, rhs_vector; samples = samples)
+    benchmark(csr, rhs_vector; samples=samples)
 end
 
 function benchmark(matrix_path::AbstractString, rhs_path::AbstractString; samples::UInt=UInt(3))
     dpsim_matrix = Utils.read_input(Utils.ArrayPath(matrix_path))
     rhs_vector = Utils.read_input(Utils.VectorPath(rhs_path))
-    benchmark(dpsim_matrix, rhs_vector; samples = samples)
+    benchmark(dpsim_matrix, rhs_vector; samples=samples)
 end
 
-function save_csv(path::AbstractString, matrix_path::String, benchmark_result::BenchmarkResult)
+function save_csv(path::AbstractString, benchmark_result::BenchmarkResult, matrix_path::String)
     data_frame = DataFrame(
         decomp_elapses=[benchmark_result.decomp_elapses],
         solve_elapses=[benchmark_result.solve_elapses],
-        matrix=[matrix_path]
+        matrix_path=[matrix_path]
     )
 
     # Create folder for csv
