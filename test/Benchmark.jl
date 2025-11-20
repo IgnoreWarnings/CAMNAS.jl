@@ -14,6 +14,27 @@ using .Utils
     solve_elapses::Float64
 end
 
+"""
+    function benchmark(dpsim_matrix::dpsim_csr_matrix, rhs_vector::Vector{Float64}; samples::UInt=UInt(3))
+
+*Note: Camnas debug output gets disabled during this funcion for performance reasons*
+
+This function benchmarks the currently active system configutaion by measuring lu-decomposing and solving times 
+    of a given `dpsim_matrix::dpsim_csr_matrix` with a `rhs_vector::Vector{Float64}`.
+
+# Arguments
+- `dpsim_matrix::dpsim_csr_matrix`: Input matrix
+- `rhs_vector::Vector{Float64}`: The right hand side of A * x = rhs
+- `samples::UInt=UInt(3)`: Number of executions (only lowest time counts)
+
+# Returns
+- `BenchmarkResult`: The benchmark result containing
+    - `decomp_elapses::Float64`: Duration of lu-decomposition
+    - `solve_elapses::Float64`: Duration of solving
+
+# Example
+```julia
+"""
 function benchmark(dpsim_matrix::dpsim_csr_matrix, rhs_vector::Vector{Float64}; samples::UInt=UInt(3))
     # Save Environment
     saved_debug_env = get(ENV, "JULIA_DEBUG", "") # Use default value if not found
