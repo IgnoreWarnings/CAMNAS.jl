@@ -1,0 +1,11 @@
+] activate .
+] test
+
+Filewatcher misses update timing? Wait/trigegr update?
+
+saving
+    add warning if file exists
+plotting
+
+bugs:
+path convention of read input determines read type

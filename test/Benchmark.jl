@@ -116,4 +116,18 @@ function benchmark(matrix_path::AbstractString, rhs_path::AbstractString; sample
     benchmark(dpsim_matrix, rhs_vector; samples=samples)
 end
 
+function save_benchmark(path::AbstractString, benchmark_result::BenchmarkResult, matrix_path::String)
+    data_frame = DataFrame(
+        decomp_elapses=[benchmark_result.decomp_elapses],
+        solve_elapses=[benchmark_result.solve_elapses],
+        matrix_path=[matrix_path]
+    )
+
+    # Create folder for csv
+    mkpath(dirname("$path"))
+
+    append = isfile("$path") # with append no header is written
+    CSV.write("$path", data_frame; append=append)
+end
+
 end
