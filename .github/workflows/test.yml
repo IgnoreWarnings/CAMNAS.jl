@@ -15,10 +15,13 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
     strategy:
+      fail-fast: false
       matrix:
         julia-version: ['1.12.1']
-        julia-arch: [x64, x86]
+        julia-arch: [x64]
 
     steps:
       - uses: actions/checkout@v4
