@@ -118,9 +118,9 @@ using CAMNAS, Test
             density=0.01,
             seed=pre_seed
         )
-        #matrix = Generator.generate_matrix(settings)
-        #rhs_vector = Generator.generate_rhs_vector(matrix)
-        #@test Benchmark.benchmark(matrix, rhs_vector) isa Benchmark.BenchmarkResult
+        matrix = Generator.generate_matrix(settings)
+        rhs_vector = Generator.generate_rhs_vector(matrix)
+        @test Benchmark.benchmark(matrix, rhs_vector) isa Benchmark.BenchmarkResult
 
         # CUDA accelerator
         #@test Benchmark.benchmark(matrix, rhs_vector) isa Benchmark.BenchmarkResult skip=!CAMNAS.has_accelerator(CAMNAS.CUDAccelerator())
