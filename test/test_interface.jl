@@ -81,8 +81,8 @@ begin # Benchmark performance test
     function build_generator_settings()
         # Matrix settings
         generator_settings = []
-        dimensions = collect(500:100:600)
-        densities = collect(0.1:0.1:0.2)
+        dimensions = collect(500:100:1000)
+        densities = collect(0.1:0.1:0.3)
 
         for dimension in dimensions
             for density in densities
@@ -119,7 +119,7 @@ begin # Benchmark performance test
     end
 
     function prepare_strategies()
-        accelerators = ["Tesla P40(1)"]
+        accelerators = ["Tesla P40(1)", "NVIDIA A2(0)"]
 
         strategies = []
         for accelerator in accelerators
