@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  julia:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     continue-on-error: true
@@ -42,4 +42,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run Makefile tests if present
-        run: make Makefile
+        run: make
