@@ -53,5 +53,9 @@ jobs:
           arch: ${{ matrix.julia-arch }}
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
+
+      - name: Install Julia project dependencies
+        run: julia -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
       - name: Run Makefile tests if present
         run: make
