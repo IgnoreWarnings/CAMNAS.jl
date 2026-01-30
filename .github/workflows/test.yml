@@ -34,3 +34,8 @@ jobs:
       - uses: julia-actions/julia-runtest@v1
         # with:
         #   annotate: true
+
+    make:
+      - uses: actions/checkout@v4
+      - name: Run Makefile tests if present
+        run: make Makefile
