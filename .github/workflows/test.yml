@@ -38,8 +38,20 @@ jobs:
   make:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        julia-version: ['1.12.1']
+        julia-arch: [x64]
 
     steps:
       - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.julia-version }}
+          arch: ${{ matrix.julia-arch }}
+      - uses: julia-actions/cache@v2
+      - uses: julia-actions/julia-buildpkg@v1
       - name: Run Makefile tests if present
         run: make
