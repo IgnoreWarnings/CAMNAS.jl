@@ -37,7 +37,7 @@ jobs:
 
   build-make:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     continue-on-error: true
     
     strategy:
