@@ -35,7 +35,11 @@ jobs:
         # with:
         #   annotate: true
 
-    make:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
       - uses: actions/checkout@v4
       - name: Run Makefile tests if present
         run: make Makefile
