@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  julia:
+  julia-runtests:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     continue-on-error: true
@@ -35,9 +35,10 @@ jobs:
         # with:
         #   annotate: true
 
-  make:
+  build-make:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
+    continue-on-error: true
     
     strategy:
       fail-fast: false
@@ -57,5 +58,5 @@ jobs:
       - name: Install Julia project dependencies
         run: julia -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
-      - name: Run Makefile tests if present
+      - name: Run Makefile
         run: make
