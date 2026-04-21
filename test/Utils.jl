@@ -28,6 +28,12 @@ function csr_to_dpsim(csr::SparseMatrixCSR)
     )
 end
 
+function julia_to_dpsim(matrix::Matrix)
+    csr = Utils.to_zerobased_csr(matrix)
+    dpsim_matrix = Utils.csr_to_dpsim(csr)
+    return dpsim_matrix
+end
+
 function read_input(path::ArrayPath)
     # Read system matrix from file
     system_matrix_strings = readlines(path.path)
