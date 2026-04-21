@@ -69,3 +69,110 @@ end # end Solving
 begin # Cleanup step
     cleanup()
 end # end Cleanup
+
+begin # Benchmark performance test
+    include("Benchmark.jl")
+    include("Generator.jl")
+    include("Utils.jl")
+    include("MatrixValidator.jl")
+
+    function next_run_folder(base_dir="testBenchmark/")
+        runs = filter(name -> occursin(r"^run_\d+$", name), readdir(base_dir))
+
+        if isempty(runs)
+            return joinpath(base_dir, "run_1")
+        end
+
+        nums = parse.(Int, replace.(runs, r"^run_" => ""))
+        next_num = maximum(nums) + 1
+
+        return joinpath(base_dir, "run_$(next_num)")
+    end
+
+    benchmarkPath = next_run_folder()
+
+    function build_generator_settings()
+        # Matrix settings
+        generator_settings = []
+        dimensions = collect(1000:200:20000)
+        densities = collect(0.01:0.01:0.01)
+
+        for dimension in dimensions
+            for density in densities
+                setting = Generator.Settings(
+                    dimension=dimension,
+                    density=density,
+                    seed=1337
+                )
+                push!(generator_settings, setting)
+            end
+        end
+
+        return generator_settings
+    end
+
+    function save_input(matrix)
+        # Save matrix file
+        csr_matrix = Utils.to_zerobased_csr(matrix)
+        matrix_path = "$benchmarkPath/system_matrix_($(size(matrix, 1)))_($(MatrixValidator.density(matrix))).txt"
+        Generator.matrix_to_file(csr_matrix, matrix_path=matrix_path)
+
+        return matrix_path
+    end
+
+    function prepare_strategies()
+        accelerators = ["cpu", "NVIDIA GH200 144G HBM3e(0)"] #"Tesla P40(2)", "NVIDIA GH200 144G HBM3e(0)", "cpu"]
+
+        strategies = []
+        for accelerator in accelerators
+            push!(strategies, Dict("allow_strategies" => true, "specific_accelerator_strategy" => true,"specific_accelerator" => accelerator))
+        end
+
+        return strategies
+    end
+
+    function await_config_update(strategy)
+        # Change Camnas strategy
+        CAMNAS.update_varDict!(strategy)
+
+        # Spinlock
+        if ENV["JL_MNA_RUNTIME_SWITCH"] == true
+            while CAMNAS.current_accelerator.name != strategy["specific_accelerator"]
+                println(CAMNAS.current_accelerator.name)
+                println(strategy["specific_accelerator"])
+                sleep(2)
+            end
+        end
+    end
+
+    ### Run
+    generator_settings_vector = build_generator_settings()
+    for generator_settings in generator_settings_vector
+        matrix = Generator.generate_matrix(generator_settings)
+        matrix_path = save_input(matrix)
+
+        # Calculate decomposition, store state in CAMNAS
+        GC.enable(false)
+        dpsim_matrix = Utils.julia_to_dpsim(matrix)
+        system_matrix_ptr = pointer_from_objref(dpsim_matrix)
+        ptr = Base.unsafe_convert(Ptr{dpsim_csr_matrix}, system_matrix_ptr)
+        decomp(ptr)
+        
+        strategies = prepare_strategies()
+        for strategy in strategies
+            await_config_update(strategy)
+
+            RUNS = 10
+            rhs_vectors = [ Generator.generate_rhs_vector(matrix; prefered_solution=fill(Float64(i), size(matrix, 1))) for i in  1:RUNS] #rand(size(matrix, 1)))
+            for (i, rhs) in enumerate(rhs_vectors)
+                print("Run $i of $(length(rhs_vectors))")
+                metrics = Benchmark.benchmark(rhs)
+                Benchmark.save_csv("$benchmarkPath/benchmark.csv", metrics, CAMNAS.varDict, matrix_path) # TODO: Add RHS and RESULT
+                println(" completed.")
+            end
+        end
+
+        GC.enable(true)
+    end
+
+end
