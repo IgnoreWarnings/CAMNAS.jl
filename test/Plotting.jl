@@ -104,6 +104,17 @@ function read_dimension(matrix_path)
     end
 end
 
+function read_nnz(matrix_path)
+    # Read nnz from line 5
+    open(matrix_path, "r") do io
+        for (i, line) in enumerate(eachline(io))
+            if i == 5 # nnz
+                return parse(Int, string(line))
+            end
+        end
+    end
+end
+
 """
     function plot_metric(csv_paths, metric::String)
 
@@ -135,7 +146,7 @@ end
 
 function plot_metric(df::DataFrame, metric::String)
     # Store points per accelerator
-    data = Dict{String, Tuple{Vector{Int}, Vector{Float64}}}()
+    data = Dict{String,Tuple{Vector{Int},Vector{Float64},Vector{Float64}}}()
 
     matrix_groups = groupby(df, :matrix_path)
     for matrix_group in matrix_groups
@@ -150,28 +161,49 @@ function plot_metric(df::DataFrame, metric::String)
             accelerator_name = string(strat["specific_accelerator"])
 
             # Average
-            solve_average = mean(Float64(run.metrics[metric]) for run in eachrow(strategy_group))
+            metric_average = median(Float64(run.metrics[metric]) for run in eachrow(strategy_group))
 
             # Initialize if needed
             if !haskey(data, accelerator_name)
-                data[accelerator_name] = (Int[], Float64[])
+                data[accelerator_name] = (Int[], Float64[], Float64[])
             end
+
+            # Compute sparsity
+            nnz = read_nnz(matrix_path)
+            sparsity = Float64(nnz) / (Float64(dimension)^2)
 
             # Add to points
             push!(data[accelerator_name][1], dimension)
-            push!(data[accelerator_name][2], solve_average)
+            push!(data[accelerator_name][2], metric_average)
+            push!(data[accelerator_name][3], round(sparsity; sigdigits=1))
         end
     end
 
     # Create bar traces
     traces = PlotlyJS.GenericTrace[]
 
-    for (acc, (xs, ys)) in data
-        push!(traces, bar(
-            name = acc,
-            x = xs,
-            y = ys
-        ))
+    for (acc, (xs, ys, sparsities)) in data
+        # group indices by sparsity key
+        idxs_by_s = Dict{Float64, Vector{Int}}()
+        for (i, s) in enumerate(sparsities)
+            if !haskey(idxs_by_s, s)
+                idxs_by_s[s] = Int[]
+            end
+            push!(idxs_by_s[s], i)
+        end
+
+        # create one trace per sparsity, sorted by sparsity
+        for s in sort(collect(keys(idxs_by_s)))
+            idxs = idxs_by_s[s]
+            bx = [xs[i] for i in idxs]
+            by = [ys[i] for i in idxs]
+            push!(traces, bar(
+                name = string(acc, ", sparsity=", s),
+                x = bx,
+                y = by,
+                legendgroup = string(acc, s)
+            ))
+        end
     end
 
     layout = Layout(
@@ -188,9 +220,9 @@ function plot_metric(df::DataFrame, metric::String)
 end
 
 begin
-    plot_metric(["testBenchmark/ghost_cpu/benchmark.csv", 
-                "testBenchmark/ghost_gpu/benchmark.csv",
-                "testBenchmark/grace/benchmark.csv",
+    plot_metric(["benchmark/grace_cudss/benchmark.csv",
+            "benchmark/grace_cpu/benchmark.csv",
+            "benchmark/run_1/benchmark.csv",
             ], "solve")
 end
 
