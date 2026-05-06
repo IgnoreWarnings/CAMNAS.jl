@@ -77,7 +77,7 @@ begin # Benchmark performance test
     include("Utils.jl")
     include("MatrixValidator.jl")
 
-    function next_run_folder(base_dir="testBenchmark/")
+    function next_run_folder(base_dir="benchmark/")
         runs = filter(name -> occursin(r"^run_\d+$", name), readdir(base_dir))
 
         if isempty(runs)
