@@ -1,5 +1,11 @@
+import Base.parse
+
 export create_env_file
 export parse_env_vars
+
+function Base.parse(type::Type{String}, input::String)
+    return input
+end
 
 function env(env_var, default)
     if haskey(ENV, env_var)
@@ -43,7 +49,7 @@ function parse_env_vars()
     varDict["highest_flop_strategy"] = env("JL_MNA_HIGHEST_FLOP_STRATEGY", false)
     varDict["specific_accelerator_strategy"] = env("JL_MNA_SPECIFIC_ACCELERATOR_STRATEGY", false)
 
-    varDict["specific_accelerator"] = env("JL_MNA_SPECIFIC_ACCELERATOR", nothing)
+    varDict["specific_accelerator"] = env("JL_MNA_SPECIFIC_ACCELERATOR", "nothing")
 
     return varDict
 end

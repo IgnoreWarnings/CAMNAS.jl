@@ -135,7 +135,7 @@ end
 function determine_accelerator(strategy::SpecificAcceleratorStrategy, accelerators_vector::Vector{AbstractAccelerator})
     specific_acc_name = varDict["specific_accelerator"]
 
-    if specific_acc_name === nothing
+    if specific_acc_name == "nothing"
         @error "No specific accelerator name provided in 'specific_accelerator' variable."
         return nothing
     end
