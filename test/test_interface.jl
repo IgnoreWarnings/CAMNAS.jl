@@ -159,7 +159,8 @@ begin # Benchmark performance test
             rhs_vectors = [ Generator.generate_rhs_vector(matrix; prefered_solution=fill(Float64(i), size(matrix, 1))) for i in  1:RUNS] #rand(size(matrix, 1)))
             for (i, rhs) in enumerate(rhs_vectors)
                 print("Run $i of $(length(rhs_vectors))")
-                metrics = Benchmark.benchmark(rhs)
+                metrics = Benchmark.benchmark_solve(rhs)
+#print(metrics.lhs)
                 Benchmark.save_csv("$benchmarkPath/benchmark.csv", metrics, CAMNAS.varDict, matrix_path) # TODO: Add RHS and RESULT
                 println(" completed.")
             end

@@ -24,10 +24,10 @@ function get_next_folder(base_dir="benchmark/")
         return joinpath(base_dir, "run_$(next_num)")
     end
 
-function benchmark(rhs::Vector{Float64})
+function benchmark_solve(rhs::Vector{Float64})
     solve = @elapsed begin
-        lhs_vector = zeros(Float64, length(rhs))
-        CAMNAS.solve(Base.unsafe_convert(Ptr{Cdouble}, rhs), Base.unsafe_convert(Ptr{Cdouble}, lhs_vector))
+        lhs = zeros(Float64, length(rhs))
+        CAMNAS.solve(Base.unsafe_convert(Ptr{Cdouble}, rhs), Base.unsafe_convert(Ptr{Cdouble}, lhs))
     end
 
     Dict("solve" => solve)
