@@ -105,44 +105,13 @@ function mna_solve(lu_wrapper::CUDSSAccelerator_LUdecomp, rhs, accelerator::CUDS
 
     x_cpu = zeros(Float64, lu_wrapper.solver.matrix.nrows)
     x_gpu = CuVector(x_cpu)
-    # @show lu_wrapper
-    # @show lu_wrapper.solver
-    # @show x_gpu
-    # @show b
 
+    # TODO: Verify solver returned from wrapper is ok
     cudss("solve", lu_wrapper.solver, x_gpu, b_gpu)
-    # r_gpu = b_gpu - A_gpu * x_gpu
 
     @debug x_gpu
     
     return Array(x_gpu)
-end
-
-function estimate_perf(accelerator::CUDSSAccelerator;
-                        n::Int = 8192, 
-                        trials::Int = 5,
-                        inT::DataType=Float64,
-                        ouT::DataType=inT)   # returns flops in GFLOPs
-    dev::CUDA.CuDevice = accelerator.device
-    @debug "Estimating performance Indication for CUDA device $(dev.handle) with benchmarking"
-
-    # Set the CUDA device for benchmark
-    CUDA.device!(dev)
-    
-    # Allocate GPU matrices
-    A = CUDA.ones(inT, n, n)
-    B = CUDA.ones(inT, n, n)
-    C = CUDA.zeros(ouT, n, n)
-
-    flops = 2 * n^3 - n^2
-
-    min_time = @belapsed CUDA.@sync mul!($C, $A, $B) 
-
-    gflops = flops / (min_time * 1e9)
-
-    perfIndicator = round(gflops, digits=2)
-  
-    return perfIndicator
 end
 
 function set_acceleratordevice!(accelerator::CUDSSAccelerator)
@@ -168,18 +137,4 @@ function set_acceleratordevice!(accelerator::CUDSSAccelerator)
     # Recreate LU decompositions on the new device
     CAMNAS.system_matrix[idx] = mna_decomp(cuda_lu, accelerator)
     @debug "Successfully migrated LU decomposition to device $(accelerator.device)"
-end
-
-function system_matrix_dev2host(cuda_lu::CUDSSAccelerator_LUdecomp) #transfer LU factorization from CUSOLVERRF.RFLU to SparseArrays.UMFPACK.UMFPACKLU type
-    # Access combined LU matrix (GPU, CSR format)
-    M_gpu = cuda_lu.lu_decomp.M
-
-    rowPtr = collect(M_gpu.rowPtr)
-    colVal = collect(M_gpu.colVal)
-    nzVal = collect(M_gpu.nzVal)
-    nrow = size(M_gpu, 1)
-    ncol = size(M_gpu, 2)
-
-    M_cpu = SparseMatrixCSR{1}(nrow, ncol, rowPtr, colVal, nzVal) # 1 indicates index base
-    return  M_cpu
 end
