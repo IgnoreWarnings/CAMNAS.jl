@@ -11,6 +11,11 @@ begin # Initialization
     ENV["JL_MNA_RUNTIME_SWITCH"] = "true" # Enable runtime switch
     ENV["JL_MNA_PRINT_ACCELERATOR"] = "false" # Enable printing accelerator in each solve steps
 
+    # FORCE Accelerator
+    ENV["JL_MNA_RUNTIME_SWITCH"] = "false"
+    ENV["JL_MNA_SPECIFIC_ACCELERATOR_STRATEGY"] = "true"
+    ENV["JL_MNA_SPECIFIC_ACCELERATOR"] = "NVIDIA GH200 144G HBM3e(0)"
+
     push!(LOAD_PATH, pwd())
     #push!(LOAD_PATH, "$(pwd())/accelerators")
     @info LOAD_PATH
@@ -50,26 +55,26 @@ begin # Initialization
     GC.enable(true)
 end # end Initialization
 
-begin # Decomposition step
-    GC.enable(false) # We cannot be sure that system_matrix is garbage collected before the pointer is passed...
-    system_matrix = Utils.read_input(Utils.ArrayPath("$(@__DIR__)/system_matrix_$inputType.txt"))
-    system_matrix_ptr = pointer_from_objref(system_matrix)
-    rhs_vector = Utils.read_input(Utils.VectorPath("$(@__DIR__)/rhs_$inputType.txt"))
-    lhs_vector = zeros(Float64, length(rhs_vector))
-    rhs_reset = ones(Float64, length(rhs_vector))
+# begin # Decomposition step
+#     GC.enable(false) # We cannot be sure that system_matrix is garbage collected before the pointer is passed...
+#     system_matrix = Utils.read_input(Utils.ArrayPath("$(@__DIR__)/system_matrix_$inputType.txt"))
+#     system_matrix_ptr = pointer_from_objref(system_matrix)
+#     rhs_vector = Utils.read_input(Utils.VectorPath("$(@__DIR__)/rhs_$inputType.txt"))
+#     lhs_vector = zeros(Float64, length(rhs_vector))
+#     rhs_reset = ones(Float64, length(rhs_vector))
 
     
-    @time decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, system_matrix_ptr))
-    GC.enable(true)
-end # end Decomposition
+#     @time decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, system_matrix_ptr))
+#     GC.enable(true)
+# end # end Decomposition
 
-begin # Solving step 
-    @time solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_reset), Base.unsafe_convert(Ptr{Cdouble}, lhs_vector))
-end # end Solving
+# begin # Solving step 
+#     @time solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_reset), Base.unsafe_convert(Ptr{Cdouble}, lhs_vector))
+# end # end Solving
 
-begin # Cleanup step
-    cleanup()
-end # end Cleanup
+# begin # Cleanup step
+#     cleanup()
+# end # end Cleanup
 
 begin # Benchmark performance test
     include("Benchmark.jl")
@@ -95,8 +100,8 @@ begin # Benchmark performance test
     function build_generator_settings()
         # Matrix settings
         generator_settings = []
-        dimensions = collect(1000:200:20000)
-        densities = collect(0.01:0.01:0.01)
+        dimensions = collect(200:200:20000)
+        densities = collect(0.01:0.1:0.2)
 
         for dimension in dimensions
             for density in densities
@@ -122,7 +127,7 @@ begin # Benchmark performance test
     end
 
     function prepare_strategies()
-        accelerators = ["cpu", "NVIDIA GH200 144G HBM3e(0)"] #"Tesla P40(2)", "NVIDIA GH200 144G HBM3e(0)", "cpu"]
+        accelerators = ["NVIDIA GH200 144G HBM3e(0)"] #"Tesla P40(2)", "NVIDIA GH200 144G HBM3e(0)", "cpu"]
 
         strategies = []
         for accelerator in accelerators

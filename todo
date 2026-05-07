@@ -1,0 +1,27 @@
+ToDo:
+    erst grace, dann ghost
+        kein runtimeswitch
+            - cuda und cudss und cpu mit generierten Matrizen
+            - cuda und cudss und cpu mit test/rhs_big.txt
+        
+        mit runtimeswitch
+
+        cudss logs, solve backwards skip decomp
+        check results
+
+Warnings:
+    Vscode cmnd+enter adds random execution time overhead
+     - use: CUDA_VISIBLE_DEVICES=0 julia -t4,0 test/test_interface.jl
+
+    - Runtime switch calculates gpu and cpu decomp
+    - Runtime switch enabled gived bad benchmarks, performance problems
+
+Notes:
+    - CUDSS takes very long on first solve
+    
+    - Memory gets eaten somewhere. GC between solves or after decomp causes it?
+
+    - fix julia version:
+        juliaup add 1.12.1
+        juliaup default 1.12.1
+    

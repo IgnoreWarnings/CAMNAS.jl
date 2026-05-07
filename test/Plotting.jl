@@ -220,9 +220,9 @@ function plot_metric(df::DataFrame, metric::String)
 end
 
 begin
-    plot_metric(["benchmark/grace_cudss/benchmark.csv",
+    plot_metric(["benchmark/grace_switch/benchmark.csv",
             "benchmark/grace_cpu/benchmark.csv",
-            "benchmark/run_1/benchmark.csv",
+            "benchmark/run_2/benchmark.csv",
             ], "solve")
 end
 

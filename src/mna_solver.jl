@@ -236,7 +236,7 @@ function evaluate_system_environment(content)
 
     # Currently, force statments are the strongest, then consider strategies
     if varDict["runtime_switch"] || first_run
-
+        
         # FORCING
         if varDict["force_cpu"] || varDict["force_gpu"]
             if varDict["force_cpu"] && varDict["force_gpu"]
@@ -297,7 +297,7 @@ function evaluate_system_environment(content)
         end
         @info "[CAMNAS] Currently used accelerator: $current_accelerator" 
     else
-        @warn "Runtime switch is disabled, Accelerator will not be changed."
+        @debug "Runtime switch is disabled, Accelerator will not be changed."
     end
 end    
 
