@@ -48,6 +48,23 @@ settings = Generator.Settings(
     seed::UInt = rand(UInt)
 end
 
+
+"""
+    Lazy Iterator
+"""
+struct LazyMatrixBuilder
+    settings::Vector{Settings}
+end
+
+function Base.iterate(matrix_builder::LazyMatrixBuilder, state=1)
+    if state > size(matrix_builder.settings)[1]
+        return nothing
+    end
+
+    return (generate_matrix(matrix_builder.settings[state]), state + 1)
+end
+
+
 """
     generate_matrix(settings::Settings)
 

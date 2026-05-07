@@ -9,50 +9,20 @@ using CAMNAS
 
 using Base
 using BenchmarkTools
-using SparseMatricesCSR
-using SparseArrays
 using CSV, DataFrames
-using CUDA
-using CUSOLVERRF
-using CUDA.CUSPARSE
-using LinearAlgebra
 
-include("Utils.jl")
-using .Utils
+function get_next_folder(base_dir="benchmark/")
+        runs = filter(name -> occursin(r"^run_\d+$", name), readdir(base_dir))
 
-function find_gpu_decomp()
-    idx = findfirst(x -> typeof(x) == CAMNAS.Accelerators.CUDAccelerator_LUdecomp, CAMNAS.system_matrix)
-    if idx !== nothing
-        return CAMNAS.system_matrix[idx].lu_decomp
+        if isempty(runs)
+            return joinpath(base_dir, "run_1")
+        end
+
+        nums = parse.(Int, replace.(runs, r"^run_" => ""))
+        next_num = maximum(nums) + 1
+
+        return joinpath(base_dir, "run_$(next_num)")
     end
-
-    throw("No decomp present.")
-end
-
-function cuda_benchmark(dpsim_matrix::dpsim_csr_matrix, rhs::Vector{Float64})
-    GC.enable(false)
-
-    # run all decomps
-    system_matrix_ptr = pointer_from_objref(dpsim_matrix)
-    decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, system_matrix_ptr))
-    
-    host2dev = @elapsed begin
-        rhs_d = CuVector(rhs)
-    end
-
-    mat = find_gpu_decomp()
-    solve = @elapsed begin
-        ldiv!(mat, rhs_d)
-    end
-
-    dev2host = @elapsed begin
-        result = Array(rhs_d)
-    end
-
-    GC.enable(true)
-
-    Dict("host2dev" => host2dev, "solve" => solve, "dev2host" => dev2host)
-end
 
 function benchmark(rhs::Vector{Float64})
     solve = @elapsed begin
@@ -61,28 +31,6 @@ function benchmark(rhs::Vector{Float64})
     end
 
     Dict("solve" => solve)
-end
-
-
-"""
-    function benchmark(csr::SparseMatrixCSR, rhs::Vector{Float64}; samples::UInt=UInt(3))
-
-Wrapper for `function benchmark(dpsim_matrix::dpsim_csr_matrix, rhs::Vector{Float64}; samples::UInt=UInt(3))`
-"""
-function cuda_benchmark(csr::SparseMatrixCSC, rhs::Vector{Float64})
-    dpsim_matrix = Utils.csc_to_dpsim(csr)
-    cuda_benchmark(dpsim_matrix, rhs)
-end
-
-"""
-    function benchmark(matrix_path::AbstractString, rhs_path::AbstractString; samples::UInt=UInt(3))
-
-Wrapper for `function benchmark(dpsim_matrix::dpsim_csr_matrix, rhs::Vector{Float64}; samples::UInt=UInt(3))`
-"""
-function cuda_benchmark(matrix_path::AbstractString, rhs_path::AbstractString)
-    dpsim_matrix = Utils.read_input(Utils.ArrayPath(matrix_path))
-    rhs = Utils.read_input(Utils.VectorPath(rhs_path))
-    cuda_benchmark(dpsim_matrix, rhs; samples=samples)
 end
 
 """

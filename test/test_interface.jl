@@ -14,7 +14,7 @@ begin # Initialization
     # FORCE Accelerator
     ENV["JL_MNA_RUNTIME_SWITCH"] = "false"
     ENV["JL_MNA_SPECIFIC_ACCELERATOR_STRATEGY"] = "true"
-    ENV["JL_MNA_SPECIFIC_ACCELERATOR"] = "NVIDIA GH200 144G HBM3e(0)"
+    ENV["JL_MNA_SPECIFIC_ACCELERATOR"] = "CUDSS Tesla P40(0)"
 
     push!(LOAD_PATH, pwd())
     #push!(LOAD_PATH, "$(pwd())/accelerators")
@@ -82,20 +82,7 @@ begin # Benchmark performance test
     include("Utils.jl")
     include("MatrixValidator.jl")
 
-    function next_run_folder(base_dir="benchmark/")
-        runs = filter(name -> occursin(r"^run_\d+$", name), readdir(base_dir))
-
-        if isempty(runs)
-            return joinpath(base_dir, "run_1")
-        end
-
-        nums = parse.(Int, replace.(runs, r"^run_" => ""))
-        next_num = maximum(nums) + 1
-
-        return joinpath(base_dir, "run_$(next_num)")
-    end
-
-    benchmarkPath = next_run_folder()
+    benchmarkPath = Benchmark.get_next_folder()
 
     function build_generator_settings()
         # Matrix settings
@@ -117,17 +104,8 @@ begin # Benchmark performance test
         return generator_settings
     end
 
-    function save_input(matrix)
-        # Save matrix file
-        csr_matrix = Utils.to_zerobased_csr(matrix)
-        matrix_path = "$benchmarkPath/system_matrix_($(size(matrix, 1)))_($(MatrixValidator.density(matrix))).txt"
-        Generator.matrix_to_file(csr_matrix, matrix_path=matrix_path)
-
-        return matrix_path
-    end
-
     function prepare_strategies()
-        accelerators = ["NVIDIA GH200 144G HBM3e(0)"] #"Tesla P40(2)", "NVIDIA GH200 144G HBM3e(0)", "cpu"]
+        accelerators = ["CUDSS Tesla P40(0)"] #"Tesla P40(2)", "NVIDIA GH200 144G HBM3e(0)", "cpu"]
 
         strategies = []
         for accelerator in accelerators
@@ -135,6 +113,15 @@ begin # Benchmark performance test
         end
 
         return strategies
+    end
+
+    function save_input(matrix)
+        # Save matrix file
+        csr_matrix = Utils.to_zerobased_csr(matrix)
+        matrix_path = "$benchmarkPath/system_matrix_($(size(matrix, 1)))_($(MatrixValidator.density(matrix))).txt"
+        Generator.matrix_to_file(csr_matrix, matrix_path=matrix_path)
+
+        return matrix_path
     end
 
     function await_config_update(strategy)
@@ -153,8 +140,8 @@ begin # Benchmark performance test
 
     ### Run
     generator_settings_vector = build_generator_settings()
-    for generator_settings in generator_settings_vector
-        matrix = Generator.generate_matrix(generator_settings)
+    matrix_builder = Generator.LazyMatrixBuilder(generator_settings_vector)
+    for matrix in matrix_builder
         matrix_path = save_input(matrix)
 
         # Calculate decomposition, store state in CAMNAS
