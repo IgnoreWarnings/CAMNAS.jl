@@ -1,5 +1,15 @@
 module Plotting
 
+
+push!(LOAD_PATH, pwd())
+    #push!(LOAD_PATH, "$(pwd())/accelerators")
+    @info LOAD_PATH
+    using Pkg
+    Pkg.activate(LOAD_PATH[4]*"/test")
+    Pkg.status()
+
+using CAMNAS
+
 using CSV
 using DataFrames
 using PlotlyJS
@@ -128,15 +138,16 @@ function plot_metric(df::DataFrame, metric::String)
     )
 
     plt = plot(traces, layout)
-    display(plt)
+    #display(plt)
 
     savefig(plt, "benchmark_plot.html")
 end
 
 begin
-    plot_metric(["benchmark/grace_switch/benchmark.csv",
-            "benchmark/grace_cpu/benchmark.csv",
-            "benchmark/run_2/benchmark.csv",
+    plot_metric(["benchmark/grace_cpu/benchmark.csv",
+            "benchmark/ghost_cpu/benchmark.csv",
+            "benchmark/ghost_cudss/benchmark.csv",
+            "benchmark/grace_cudss/benchmark.csv",
             ], "solve")
 end
 
