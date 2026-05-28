@@ -14,6 +14,8 @@ using SparseMatricesCSR
 using LinearAlgebra
 using Base
 
+include("Utils.jl")
+
 """
     Settings
 
@@ -64,6 +66,17 @@ function Base.iterate(matrix_builder::LazyMatrixBuilder, state=1)
     return (generate_matrix(matrix_builder.settings[state]), state + 1)
 end
 
+struct LazyMatrixLoader
+    paths::Vector{String}
+end
+
+function Base.iterate(matrix_loader::LazyMatrixLoader, state=1)
+    if state > size(matrix_loader.paths)[1]
+        return nothing
+    end
+
+    return (Utils.read_input_matrix(matrix_loader.paths[state]), state + 1)
+end
 
 """
     generate_matrix(settings::Settings)
