@@ -169,7 +169,7 @@ begin # Benchmark performance test
         push!(rhs_vectors, Utils.read_input(Utils.VectorPath(rhs_paths[rhs_index])))
         global rhs_index += 1
     
-        strategies = CAMNAS.varDict #prepare_strategies()
+        strategies = [ CAMNAS.varDict ] #prepare_strategies()
         for strategy in strategies
             await_config_update(strategy)
 
