@@ -106,12 +106,11 @@ using CUDA
     end
 
     @testset "Benchmark" begin
-        pre_seed = 1337
         include("Benchmark.jl")
         include("Generator.jl")
+        include("Utils.jl")
 
-        # from files
-        @test Benchmark.benchmark("system_matrix_small.txt", "rhs_small.txt") isa Benchmark.BenchmarkResult
+        pre_seed = 1337
 
         # generated matrix
         settings = Generator.Settings(
@@ -120,13 +119,19 @@ using CUDA
             seed=pre_seed
         )
         matrix = Generator.generate_matrix(settings)
-        rhs_vector = Generator.generate_rhs_vector(matrix)
-        @test Benchmark.benchmark(matrix, rhs_vector) isa Benchmark.BenchmarkResult
 
-        # CUDA accelerator
-        ENV["JL_MNA_RUNTIME_SWITCH"] = "true"
-        ENV["JL_MNA_FORCE_GPU"] = "true"
-        @test Benchmark.benchmark(matrix, rhs_vector) isa Benchmark.BenchmarkResult skip=!CUDA.has_cuda_gpu()
+        # Calculate decomposition, store state in CAMNAS
+        GC.enable(false)
+        dpsim_matrix = Utils.julia_to_dpsim(matrix)
+        system_matrix_ptr = pointer_from_objref(dpsim_matrix)
+        ptr = Base.unsafe_convert(Ptr{dpsim_csr_matrix}, system_matrix_ptr)
+        decomp(ptr)
+
+        rhs_vector = Generator.generate_rhs_vector(matrix)
+
+        @test Benchmark.benchmark_solve(rhs_vector) isa Dict
+
+        GC.enable(true)
 
     end
 end # testset "CAMNAS"
