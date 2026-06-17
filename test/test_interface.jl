@@ -87,7 +87,7 @@ begin # Benchmark performance test
     function build_generator_settings()
         # Matrix settings
         generator_settings = []
-        dimensions = collect(200:200:20000)
+        dimensions = collect(200:200:2000)
         densities = collect(0.01:0.1:0.2)
 
         for dimension in dimensions
@@ -105,7 +105,7 @@ begin # Benchmark performance test
     end
 
     function prepare_strategies()
-        accelerators = ["CUDSS Tesla P40(0)"] #"Tesla P40(2)", "NVIDIA GH200 144G HBM3e(0)", "cpu"]
+        accelerators = ["cpu"] #"Tesla P40(2)", "NVIDIA GH200 144G HBM3e(0)", "cpu"]
 
         strategies = []
         for accelerator in accelerators
@@ -139,15 +139,16 @@ begin # Benchmark performance test
     end
 
     ### Run
-# Generated
-    #generator_settings_vector = build_generator_settings()
-#matrix_iter = Generator.LazyMatrixBuilder(generator_settings_vector)
-    
+
+    # Generated
+    generator_settings_vector = build_generator_settings()
+    matrix_iter = Generator.LazyMatrixBuilder(generator_settings_vector)
+
     # From File
-    matrix_paths = ["test/system_matrix_small.txt", "test/system_matrix_medium.txt", "test/system_matrix_big.txt"]
-    matrix_iter = Generator.LazyMatrixLoader(matrix_paths)
-    rhs_paths = ["test/rhs_small.txt", "test/rhs_medium.txt", "test/rhs_big.txt"]
-    rhs_index = 1
+    # matrix_paths = ["test/system_matrix_small.txt", "test/system_matrix_medium.txt", "test/system_matrix_big.txt"]
+    # matrix_iter = Generator.LazyMatrixLoader(matrix_paths)
+    # rhs_paths = ["test/rhs_small.txt", "test/rhs_medium.txt", "test/rhs_big.txt"]
+    # rhs_index = 1
 
     for matrix in matrix_iter
         matrix_path = save_input(matrix)
@@ -158,25 +159,27 @@ begin # Benchmark performance test
         system_matrix_ptr = pointer_from_objref(dpsim_matrix)
         ptr = Base.unsafe_convert(Ptr{dpsim_csr_matrix}, system_matrix_ptr)
         decomp(ptr)
-        
+
         # RHS Vectors
         RUNS = 10
-        # Generated
-        #rhs_vectors = [ Generator.generate_rhs_vector(matrix; prefered_solution=fill(Float64(i), size(matrix, 1))) for i in 1:RUNS] #rand(size(matrix, 1)))
 
-        # From File
-        rhs_vectors = []  # [ Generator.generate_rhs_vector(matrix; prefered_solution=fill(Float64(i), size(matrix, 1))) for i in 1:(RUNS-1)] 
-        push!(rhs_vectors, Utils.read_input(Utils.VectorPath(rhs_paths[rhs_index])))
-        global rhs_index += 1
+        # Generated
+        rhs_vectors = [ Generator.generate_rhs_vector(matrix; prefered_solution=fill(Float64(i), size(matrix, 1))) for i in 1:RUNS] #rand(size(matrix, 1)))
+
+        # # From File
+        # rhs_vectors = []
+        # for run in 1:RUNS
+        #     push!(rhs_vectors, Utils.read_input(Utils.VectorPath(rhs_paths[rhs_index])))
+        # end
+        # global rhs_index += 1
     
         strategies = [ CAMNAS.varDict ] #prepare_strategies()
         for strategy in strategies
             await_config_update(strategy)
 
-                        for (i, rhs) in enumerate(rhs_vectors)
+            for (i, rhs) in enumerate(rhs_vectors)
                 print("Run $i of $(length(rhs_vectors))")
                 metrics = Benchmark.benchmark_solve(rhs)
-#print(metrics.lhs)
                 Benchmark.save_csv("$benchmarkPath/benchmark.csv", metrics, CAMNAS.varDict, matrix_path) # TODO: Add RHS and RESULT
                 println(" completed.")
             end

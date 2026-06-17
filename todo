@@ -1,13 +1,12 @@
-ToDo:
-    erst grace, dann ghost
-        kein runtimeswitch
-            - cuda und cudss und cpu mit generierten Matrizen
-            - cuda und cudss und cpu mit test/rhs_big.txt
-        
-        mit runtimeswitch
+deps:
+    - remove revise from deps
+    - remove test form buildstep
+    - git upstream
+    - build scenarios
+    - compile camnas on arm (grace)
+    - podman build issues
 
-        cudss logs, solve backwards skip decomp
-        check results
+    - c test library linking
 
 Warnings:
     Vscode cmnd+enter adds random execution time overhead
@@ -25,3 +24,6 @@ Notes:
         juliaup add 1.12.1
         juliaup default 1.12.1
     
+
+    - build
+        docker run -it -v $(pwd):/dpsim sogno/dpsim:dev bash
