@@ -14,7 +14,7 @@ begin # Initialization
     #push!(LOAD_PATH, "$(pwd())/accelerators")
     @info LOAD_PATH
     using Pkg
-    Pkg.activate(LOAD_PATH[4])
+    Pkg.activate(LOAD_PATH[4]*"/test")
     Pkg.status()
 
     using CAMNAS
