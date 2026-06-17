@@ -7,9 +7,15 @@ begin # Initialization
     ##############################################################
 
     @assert inputType in ["small", "medium", "big", "generated"]
-    ENV["JULIA_DEBUG"] = "CAMNAS" # Enable debug output
+    ENV["JULIA_DEBUG"] = "" # Enable debug output
     ENV["JL_MNA_RUNTIME_SWITCH"] = "true" # Enable runtime switch
-    ENV["JL_MNA_PRINT_ACCELERATOR"] = "true" # Enable printing accelerator in each solve steps
+    ENV["JL_MNA_PRINT_ACCELERATOR"] = "false" # Enable printing accelerator in each solve steps
+
+    # FORCE Accelerator
+    ENV["JL_MNA_RUNTIME_SWITCH"] = "false"
+    ENV["JL_MNA_SPECIFIC_ACCELERATOR_STRATEGY"] = "true"
+    ENV["JL_MNA_SPECIFIC_ACCELERATOR"] = "CUDSS Tesla P40(0)"
+
     push!(LOAD_PATH, pwd())
     #push!(LOAD_PATH, "$(pwd())/accelerators")
     @info LOAD_PATH
@@ -26,7 +32,7 @@ begin # Initialization
         include("Generator.jl")
 
         # Generate test matrix
-        generator_settings = Generator.Settings(dimension=3, density=0.01)
+        generator_settings = Generator.Settings(dimension=300, density=0.1)
         matrix = Generator.generate_matrix(generator_settings)
 
         # matrix to file
