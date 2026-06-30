@@ -1,0 +1,19 @@
+deps:
+    (+) git upstream (julia deps push not working)
+        PR reminf Felix about Hotfix
+    (+) podman build issues
+        running works: docker run -it -v $(pwd):/dpsim sogno/dpsim:dev bash
+    + build scenarios
+
+    - c test library linking
+    - compile camnas on arm (grace)
+
+Warnings:
+    Vscode cmnd+enter adds random execution time overhead
+     - use: CUDA_VISIBLE_DEVICES=0 julia -t4,0 test/test_interface.jl
+
+Notes:
+    - CUDSS takes very long on first solve
+    
+    - build
+        docker run -it -v $(pwd):/dpsim sogno/dpsim:dev bash
