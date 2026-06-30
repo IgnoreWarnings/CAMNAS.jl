@@ -63,7 +63,7 @@ begin # Decomposition step
     lhs_vector = zeros(Float64, length(rhs_vector))
     rhs_reset = ones(Float64, length(rhs_vector))
 
-    
+
     @time decomp(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, system_matrix_ptr))
     GC.enable(true)
 end # end Decomposition
@@ -109,7 +109,7 @@ begin # Benchmark performance test
 
         strategies = []
         for accelerator in accelerators
-            push!(strategies, Dict("allow_strategies" => true, "specific_accelerator_strategy" => true,"specific_accelerator" => accelerator))
+            push!(strategies, Dict("allow_strategies" => true, "specific_accelerator_strategy" => true, "specific_accelerator" => accelerator))
         end
 
         return strategies
@@ -164,7 +164,7 @@ begin # Benchmark performance test
         RUNS = 10
 
         # Generated
-        rhs_vectors = [ Generator.generate_rhs_vector(matrix; prefered_solution=fill(Float64(i), size(matrix, 1))) for i in 1:RUNS] #rand(size(matrix, 1)))
+        rhs_vectors = [Generator.generate_rhs_vector(matrix; prefered_solution=fill(Float64(i), size(matrix, 1))) for i in 1:RUNS] #rand(size(matrix, 1)))
 
         # # From File
         # rhs_vectors = []
@@ -172,8 +172,8 @@ begin # Benchmark performance test
         #     push!(rhs_vectors, Utils.read_input(Utils.VectorPath(rhs_paths[rhs_index])))
         # end
         # global rhs_index += 1
-    
-        strategies = [ CAMNAS.varDict ] #prepare_strategies()
+
+        strategies = [CAMNAS.varDict] #prepare_strategies()
         for strategy in strategies
             await_config_update(strategy)
 

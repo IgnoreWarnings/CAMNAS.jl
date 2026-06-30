@@ -26,7 +26,7 @@ struct CUDSSAccelerator <: AbstractAccelerator
     properties::AcceleratorProperties
     device::CuDevice
 
-    function CUDSSAccelerator(name::String = "cuddss", dev::CuDevice = CUDA.device() , properties=AcceleratorProperties(true, 1, 1.0, floatmax()))
+    function CUDSSAccelerator(name::String="cuddss", dev::CuDevice=CUDA.device(), properties=AcceleratorProperties(true, 1, 1.0, floatmax()))
         new(name, properties, dev)
     end
 end
@@ -42,7 +42,7 @@ on the GPU.
 # Fields
 - `lu_decomp::CUSOLVERRF.RFLU` : the GPU-resident LU factorization object.
 """
-struct CUDSSAccelerator_LUdecomp <: AbstractLUdecomp 
+struct CUDSSAccelerator_LUdecomp <: AbstractLUdecomp
     solver::CUDSS.CudssSolver
     lu_decomp
 
@@ -63,8 +63,8 @@ function has_driver(accelerator::CUDSSAccelerator)
     return true
 end
 
-function discover_accelerator(accelerators::Vector{AbstractAccelerator}, accelerator::CUDSSAccelerator) 
-    devices = collect(CUDA.devices())   # Vector of CUDA devices 
+function discover_accelerator(accelerators::Vector{AbstractAccelerator}, accelerator::CUDSSAccelerator)
+    devices = collect(CUDA.devices())   # Vector of CUDA devices
     @debug "Found $(length(devices)) CUDA devices"
 
     for device in devices
@@ -75,7 +75,7 @@ function discover_accelerator(accelerators::Vector{AbstractAccelerator}, acceler
         cuda_acc = CUDSSAccelerator(device_name, device, AcceleratorProperties(true, 1, cuda_perf, power_limit))
         push!(accelerators, cuda_acc)
     end
-    
+
 end
 
 function mna_decomp(sparse_mat, accelerator::CUDSSAccelerator)
@@ -92,7 +92,7 @@ function mna_decomp(sparse_mat, accelerator::CUDSSAccelerator)
     b_gpu = CuVector(b_cpu)
 
     cudss("analysis", solver, x_gpu, b_gpu)
-    cudss("factorization", solver, x_gpu, b_gpu) 
+    cudss("factorization", solver, x_gpu, b_gpu)
 
     lu_wrapper = solver |> CUDSSAccelerator_LUdecomp
 
@@ -110,7 +110,7 @@ function mna_solve(lu_wrapper::CUDSSAccelerator_LUdecomp, rhs, accelerator::CUDS
     cudss("solve", lu_wrapper.solver, x_gpu, b_gpu)
 
     @debug x_gpu
-    
+
     return Array(x_gpu)
 end
 
@@ -126,8 +126,8 @@ function set_acceleratordevice!(accelerator::CUDSSAccelerator)
     @debug "Setting CUDA device to $(accelerator.device) on Thread $(Threads.threadid())"
     @debug "Previous device was $(old_device)"
     @debug "Extracting LU decomposition from device $(old_device)"
-    
-    idx = findfirst(x-> typeof(x) == CUDSSAccelerator_LUdecomp, CAMNAS.system_matrix)
+
+    idx = findfirst(x->typeof(x) == CUDSSAccelerator_LUdecomp, CAMNAS.system_matrix)
     cuda_lu = system_matrix_dev2host(CAMNAS.system_matrix[idx])
 
     # Switch to new CUDA device

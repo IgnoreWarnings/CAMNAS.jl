@@ -28,7 +28,7 @@ using CUDA
 
     @testset "Initialization" begin
         @test init(Base.unsafe_convert(Ptr{dpsim_csr_matrix}, sys_mat_ptr)) == 0
-    end 
+    end
 
     @testset "Solving" begin
         @test solve(Base.unsafe_convert(Ptr{Cdouble}, rhs_vec), Base.unsafe_convert(Ptr{Cdouble}, lhs_vec)) == 0
@@ -49,7 +49,7 @@ using CUDA
 
         # Restore system matrix values
         sys_mat.values = sys_mat_bak
-    end        
+    end
 
     @testset "Generator" begin
         pre_seed = 1337

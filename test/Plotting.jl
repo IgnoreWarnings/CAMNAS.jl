@@ -2,11 +2,11 @@ module Plotting
 
 
 push!(LOAD_PATH, pwd())
-    #push!(LOAD_PATH, "$(pwd())/accelerators")
-    @info LOAD_PATH
-    using Pkg
-    Pkg.activate(LOAD_PATH[4]*"/test")
-    Pkg.status()
+#push!(LOAD_PATH, "$(pwd())/accelerators")
+@info LOAD_PATH
+using Pkg
+Pkg.activate(LOAD_PATH[4]*"/test")
+Pkg.status()
 
 using CAMNAS
 
@@ -108,7 +108,7 @@ function plot_metric(df::DataFrame, metric::String)
 
     for (acc, (xs, ys, sparsities)) in data
         # group indices by sparsity key
-        idxs_by_s = Dict{Float64, Vector{Int}}()
+        idxs_by_s = Dict{Float64,Vector{Int}}()
         for (i, s) in enumerate(sparsities)
             if !haskey(idxs_by_s, s)
                 idxs_by_s[s] = Int[]
@@ -122,10 +122,10 @@ function plot_metric(df::DataFrame, metric::String)
             bx = [xs[i] for i in idxs]
             by = [ys[i] for i in idxs]
             push!(traces, bar(
-                name = string(acc, ", sparsity=", s),
-                x = bx,
-                y = by,
-                legendgroup = string(acc, s)
+                name=string(acc, ", sparsity=", s),
+                x=bx,
+                y=by,
+                legendgroup=string(acc, s)
             ))
         end
     end
@@ -148,7 +148,7 @@ begin
             "benchmark/ghost_cpu/benchmark.csv",
             "benchmark/ghost_cudss/benchmark.csv",
             "benchmark/grace_cudss/benchmark.csv",
-            ], "solve")
+        ], "solve")
 end
 
 end
