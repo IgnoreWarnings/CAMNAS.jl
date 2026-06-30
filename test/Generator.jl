@@ -193,7 +193,7 @@ function matrix_to_file(csr::SparseMatrixCSR; matrix_path="$(@__DIR__)/system_ma
     io = open(matrix_path, "w")
 
     type_stripped_nzval = isempty(csr.nzval) ? "[]" : csr.nzval
-    type_stripped_colval = isempty(csr.colval) ? "[]" : csr.colval 
+    type_stripped_colval = isempty(csr.colval) ? "[]" : csr.colval
 
     write(io, "$type_stripped_nzval\n$(csr.rowptr)\n$(type_stripped_colval)\n$(csr.m)\n$(length(csr.nzval))")
     close(io)

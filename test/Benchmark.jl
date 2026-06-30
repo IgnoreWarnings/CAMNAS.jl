@@ -12,17 +12,17 @@ using BenchmarkTools
 using CSV, DataFrames
 
 function get_next_folder(base_dir="benchmark/")
-        runs = filter(name -> occursin(r"^run_\d+$", name), readdir(base_dir))
+    runs = filter(name -> occursin(r"^run_\d+$", name), readdir(base_dir))
 
-        if isempty(runs)
-            return joinpath(base_dir, "run_1")
-        end
-
-        nums = parse.(Int, replace.(runs, r"^run_" => ""))
-        next_num = maximum(nums) + 1
-
-        return joinpath(base_dir, "run_$(next_num)")
+    if isempty(runs)
+        return joinpath(base_dir, "run_1")
     end
+
+    nums = parse.(Int, replace.(runs, r"^run_" => ""))
+    next_num = maximum(nums) + 1
+
+    return joinpath(base_dir, "run_$(next_num)")
+end
 
 function benchmark_solve(rhs::Vector{Float64})
     solve = @elapsed begin
