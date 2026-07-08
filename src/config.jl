@@ -4,7 +4,11 @@ export parse_env_vars
 function env(env_var, default)
     if haskey(ENV, env_var)
         @info env_var * " = " * ENV[env_var]
-        parse(typeof(default), ENV[env_var])
+        if typeof(default) == String
+            ENV[env_var]
+        else
+            parse(typeof(default), ENV[env_var])
+        end
     else
         @info env_var * " not set. Using default value: " * string(default)
         default
@@ -43,7 +47,7 @@ function parse_env_vars()
     varDict["highest_flop_strategy"] = env("JL_MNA_HIGHEST_FLOP_STRATEGY", false)
     varDict["specific_accelerator_strategy"] = env("JL_MNA_SPECIFIC_ACCELERATOR_STRATEGY", false)
 
-    varDict["specific_accelerator"] = env("JL_MNA_SPECIFIC_ACCELERATOR", nothing)
+    varDict["specific_accelerator"] = env("JL_MNA_SPECIFIC_ACCELERATOR", "")
 
     return varDict
 end

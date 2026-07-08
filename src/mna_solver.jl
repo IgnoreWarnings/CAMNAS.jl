@@ -135,7 +135,7 @@ end
 function determine_accelerator(strategy::SpecificAcceleratorStrategy, accelerators_vector::Vector{AbstractAccelerator})
     specific_acc_name = varDict["specific_accelerator"]
 
-    if specific_acc_name === nothing
+    if isempty(specific_acc_name)
         @error "No specific accelerator name provided in 'specific_accelerator' variable."
         return nothing
     end
@@ -222,7 +222,7 @@ function evaluate_system_environment(content)
         if length(line) == 0
             continue
         end
-        key, value = split(line; limit=2)
+        key, value = split(line; limit=2, keepempty=true)
         try
             varDict[key] = parse(Bool, value)
         catch ArgumentError
