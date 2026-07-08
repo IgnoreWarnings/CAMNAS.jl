@@ -21,7 +21,7 @@ camnasjl.so: build/build.jl src/CAMNAS.jl src/mna_solver.jl src/config.jl build/
 	JULIA_CPU_TARGET="native" $(JULIA) --project=. --threads=auto --startup-file=no build/build.jl $(TARGET)
 
 wrapper.o:
-	gcc -c -fPIC -O2 -I$(ROOT_DIR)/CAMNASCompiled/include -I$(ROOT_DIR)/../../include build/dpsim_wrapper.c
+	gcc -c -fPIC -O2 -I$(ROOT_DIR)/CAMNASCompiled/include -I$(ROOT_DIR)/../../../include build/dpsim_wrapper.c
 
 plugin.so: wrapper.o
 	gcc -shared -o camnasjl.so dpsim_wrapper.o  -L$(ROOT_DIR)/CAMNASCompiled/lib -lcamnasjl

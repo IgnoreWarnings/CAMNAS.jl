@@ -10,6 +10,8 @@ Its key features include:
 - Asynchronous system monitoring/decision-making for accelerator selection (*under development*)
 
 ## Building
+It is recomended to use the Dockerfile.
+
 ```
 git clone https://github.com/RWTH-ACS/CAMNAS.jl.git
 cd CAMNAS.jl
