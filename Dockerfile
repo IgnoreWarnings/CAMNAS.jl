@@ -20,22 +20,28 @@ RUN mkdir -p build && cd build && \
 
 
 # Build Camnas
-FROM docker.io/library/julia:1.12.1 AS CAMNAS_BUILDER
 
 # Install build tools
-RUN apt-get update -y
-RUN apt-get install -y git gcc g++ make
+RUN dnf update && \
+    dnf install -y \
+        wget \
+        tar \
+        git \
+        gcc \
+        g++ \
+        make
 
-# Copy artifacts from the previous stage
-COPY --from=DPSIM_BUILDER /app/dpsim /app/dpsim
-COPY --from=DPSIM_BUILDER /lib /lib
-COPY --from=DPSIM_BUILDER /lib64 /lib64
-COPY --from=DPSIM_BUILDER /usr/local/lib /usr/local/lib
-COPY --from=DPSIM_BUILDER /usr/local/lib64 /usr/local/lib64
+# Install Julia
+ARG JULIA_MAJOR=1.11
+ARG JULIA_VERSION=1.11.9
 
-# Add lib64 to linker path
-RUN echo "/usr/local/lib64" | tee /etc/ld.so.conf.d/local-lib64.conf
-RUN ldconfig
+RUN wget -q https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MAJOR}/julia-${JULIA_VERSION}-linux-x86_64.tar.gz && \
+    tar -C /usr/local -xzf julia-${JULIA_VERSION}-linux-x86_64.tar.gz && \
+    ln -s /usr/local/julia-${JULIA_VERSION}/bin/julia /usr/local/bin/julia && \
+    rm julia-${JULIA_VERSION}-linux-x86_64.tar.gz
+
+ENV JULIA_BINDIR=/usr/local/julia-${JULIA_VERSION}/bin
+ENV PATH=/usr/local/julia-${JULIA_VERSION}/bin:$PATH
 
 # Clone Camnas without history
 WORKDIR /app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl
@@ -61,7 +67,7 @@ RUN cp -R /app/cim-grid-data/WSCC-09/WSCC-09_RX/* /app/dpsim/build/dpsim/example
 
 WORKDIR /app/dpsim/build/dpsim/examples/cxx
 
-
+# JULIA_NUM_THREADS=auto \
 # JL_MNA_ALLOW_GPU=false \
 # CUDA_VISIBLE_DEVICES=3 \
 # JULIA_BINDIR=/usr/local/julia/bin \

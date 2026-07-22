@@ -3,7 +3,6 @@
 
 #include <julia_init.h>
 #include <camnasjl.h>
-
 #include <dpsim/MNASolverDynInterface.h>
 
 int init_wrapper(struct dpsim_csr_matrix *matrix)
