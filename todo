@@ -4,9 +4,24 @@ deps:
     - compile camnas on arm (grace)
     - use release profile of dpsim
 
+- cuda in docker?
+- test_interface for compiled plugin
+
+- PR/failing test
+    Use cudacode for cudss
+- test examples
+- lib_Airinvestigation
+    In docker
+    ┌ Error: Metal.jl is only supported on Apple Silicon
+    └ @ Metal ~/.julia/packages/Metal/TF981/src/initialization.jl:59
+
+
+
 Warnings:
     Vscode cmnd+enter adds random execution time overhead
      - use: CUDA_VISIBLE_DEVICES=0 julia -t4,0 test/test_interface.jl
 
 Notes:
     - CUDSS takes very long on first solve
+
+
