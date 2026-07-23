@@ -75,9 +75,10 @@ jobs:
             -e JL_MNA_ALLOW_GPU=false \
             -e CUDA_VISIBLE_DEVICES=3 \
             -e JULIA_BINDIR=/usr/local/julia/bin \
-            -e LD_LIBRARY_PATH=/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl:/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl/CAMNASCompiled/lib \
             camnascompiled \
-            ./WSCC_9bus_mult_coupled \
-              -U Plugin \
-              -P camnasjl
+            bash -lc '
+              export LD_LIBRARY_PATH=/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl:/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl/CAMNASCompiled/lib:$LD_LIBRARY_PATH
+              exec ./WSCC_9bus_mult_coupled -U Plugin -P camnasjl
+            '
+
 

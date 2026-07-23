@@ -54,8 +54,6 @@ RUN julia --project=$(pwd) --eval="using Pkg;Pkg.instantiate()"
 
 # Create shared library
 RUN make -j$(nproc) camnasjl.so
-RUN ls /app/dpsim/dpsim/src/SolverPlugins/../../include
-# RUN ls /app/dpsim/dpsim/src/SolverPlugins/../../../include/dpsim
 RUN make -j$(nproc) plugin.so
 
 # Fetch cim grid data
