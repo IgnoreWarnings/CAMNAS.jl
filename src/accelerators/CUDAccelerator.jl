@@ -136,18 +136,8 @@ function set_acceleratordevice!(accelerator::CUDAccelerator)
     @debug "Setting CUDA device to $(accelerator.device) on Thread $(Threads.threadid())"
     @debug "Previous device was $(old_device)"
     @debug "Extracting LU decomposition from device $(old_device)"
-
-    idx = findfirst(x -> typeof(x) == CUDAccelerator_LUdecomp, CAMNAS.system_matrix)
-
-    # Bug?: Accelerator switching breaks if no LU decomp exists
-    # If no decomposition exists
-    if idx === nothing
-        @debug "No existing CUDA LU decomposition found; switching device only"
-        CUDA.device!(accelerator.device)
-        @debug "Current CUDA device is now $(CUDA.device())"
-        return
-    end
-
+    
+    idx = findfirst(x-> typeof(x) == CUDAccelerator_LUdecomp, CAMNAS.system_matrix)
     cuda_lu = system_matrix_dev2host(CAMNAS.system_matrix[idx])
 
     # Switch to new CUDA device
