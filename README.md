@@ -9,22 +9,47 @@ Its key features include:
 - Basic rule-based automation for accelerator selection during runtime (*under development*)
 - Asynchronous system monitoring/decision-making for accelerator selection (*under development*)
 
-## Building
+## Building as dpsim plugin
+<em>Note: The compilation of the shared library takes some time. Approx. 10 minutes on our hardware.</em>
+
+### With Docker (recommended)
+```shell
+sudo docker build -t camnas
 ```
+
+#### Running in docker
+<em>Note: To be able to use gpus in containers refer to https://podman-desktop.io/docs/podman/gpu </em>
+```shell
+sudo docker run -it --device nvidia.com/gpu=all camnas /bin/bash
+```
+```shell
+JULIA_NUM_THREADS=auto \
+JL_MNA_ALLOW_GPU=false \
+CUDA_VISIBLE_DEVICES=3 \
+JULIA_BINDIR=/usr/local/julia/bin \
+LD_LIBRARY_PATH=/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl:/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl/CAMNASCompiled/lib:$LD_LIBRARY_PATH \
+./WSCC_9bus_mult_coupled \
+    -U Plugin \
+    -P camnasjl
+```
+
+### Manual <em>(refer to Dockerfile)</em>
+#### Build Depedencies:
+- `julia>=1.12` <em>(older versions might work but the tomls have to be re-instantiated)</em>
+- `gcc`
+- `make`
+
+For an overview of the required Julia package depdendencies, see the `[deps]` section in [Project.toml](CAMNAS/Project.toml#6).
+
+To compile the dpsim plugin you will need dpsim. Follow the dpsim build instructions. Assuming dpsim is in folder named "dpsim".
+#### Build manually
+```
+cd dpsim/dpsim/src/SolverPlugins/CAMNAS.jl
 git clone https://github.com/RWTH-ACS/CAMNAS.jl.git
 cd CAMNAS.jl
 julia --project=$(pwd) --eval="using Pkg;Pkg.instantiate()"
 make
 ```
-
-## Dependencies
-Build Depedencies:
-- `julia>=1.11`
-- `gcc`
-- `make`
-- ...
-
-For an overview of the required Julia package depdendencies, see the `[deps]` section in [Project.toml](CAMNAS/Project.toml#6).
 
 ## Usage
 
