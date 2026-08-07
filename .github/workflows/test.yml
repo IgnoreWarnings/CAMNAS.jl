@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  julia-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     continue-on-error: true
@@ -34,3 +34,49 @@ jobs:
       - uses: julia-actions/julia-runtest@v1
         # with:
         #   annotate: true
+
+  docker-build:
+    timeout-minutes: 40
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t camnascompiled .
+
+      - name: Save image
+        run: docker save camnascompiled | gzip > image.tar.gz
+
+      # Save as artifact
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: image.tar.gz
+
+  shared-library-docker:
+    needs: docker-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+
+      - run: |
+          gunzip -c image.tar.gz | docker load
+
+      - run: |
+          docker run --rm \
+            -e JULIA_NUM_THREADS=auto \
+            -e JL_MNA_ALLOW_GPU=false \
+            -e CUDA_VISIBLE_DEVICES=3 \
+            -e JULIA_BINDIR=/usr/local/julia/bin \
+            camnascompiled \
+            bash -lc '
+              export LD_LIBRARY_PATH=/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl:/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl/CAMNASCompiled/lib:$LD_LIBRARY_PATH
+              exec ./WSCC_9bus_mult_coupled -U Plugin -P camnasjl
+            '
