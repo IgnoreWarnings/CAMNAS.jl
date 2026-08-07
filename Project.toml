@@ -1,7 +1,7 @@
 name = "CAMNAS"
 uuid = "0b880eee-5bea-49e4-84ce-93e95af8a2a0"
-version = "0.2.0"
 authors = ["Felix Wege <fwege@eonerc.rwth-aachen.de>"]
+version = "0.2.0"
 
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
@@ -11,7 +11,6 @@ FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 FileWatching = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PackageCompiler = "9b87118b-4619-50d2-8e1e-99f35a4d4d9d"
-Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 SparseMatricesCSR = "a0a7dd2c-ebf4-11e9-1f05-cf50bc540ca1"
 Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
