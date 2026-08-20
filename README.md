@@ -14,7 +14,7 @@ Its key features include:
 
 ### With Docker (recommended)
 ```shell
-sudo docker build -t camnas
+sudo docker build -t camnas .
 ```
 
 #### Running in Docker
