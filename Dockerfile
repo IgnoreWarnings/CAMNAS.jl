@@ -64,21 +64,3 @@ RUN make -j$(nproc) camnasjl.so
 RUN make -j$(nproc) plugin.so
 
 WORKDIR /app/dpsim/build/dpsim/examples/cxx
-
-# JULIA_NUM_THREADS=auto \
-# JL_MNA_ALLOW_GPU=false \
-# CUDA_VISIBLE_DEVICES=3 \
-# JULIA_BINDIR=/usr/local/julia/bin \
-# LD_LIBRARY_PATH=/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl:/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl/CAMNASCompiled/lib:$LD_LIBRARY_PATH \
-# ./WSCC_9bus_mult_coupled \
-#     -U Plugin \
-#     -P camnasjl
-
-# ENV JL_MNA_ALLOW_GPU=false \
-#     CUDA_VISIBLE_DEVICES=3 \
-#     JULIA_BINDIR=/usr/local/julia/bin \
-#     LD_LIBRARY_PATH=/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl:/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl/CAMNASCompiled/lib
-
-# RUN WSCC_9bus_mult_coupled \
-#     -U "Plugin" \
-#     -P "camnasjl"
