@@ -24,6 +24,7 @@ global current_strategy = NoStrategy()
 global system_matrix = Vector{AbstractLUdecomp}()
 
 function register_accelerator!(T::Type{<:AbstractAccelerator})
+    @debug "Self register: " T
     # Create Accelerator instance by calling the default constructor
     # TODO: See https://github.com/RWTH-ACS/CAMNAS.jl/issues/41
     accelerator_instance = T()
