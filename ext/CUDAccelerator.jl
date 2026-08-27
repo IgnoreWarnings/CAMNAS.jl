@@ -1,3 +1,5 @@
+module CUDAccelerator
+
 export CUDAccelerator, CUDAccelerator_LUdecomp
 export discover_accelerator, mna_decomp, mna_solve
 
@@ -5,6 +7,26 @@ using CUDA
 using CUDA.CUSPARSE
 using CUSOLVERRF
 using SparseMatricesCSR
+using BenchmarkTools
+
+using CAMNAS
+
+using CAMNAS.Accelerators: AbstractAccelerator,
+                           AcceleratorProperties,
+                           AbstractLUdecomp
+
+import CAMNAS.Accelerators: discover_accelerator,
+                            mna_decomp,
+                            mna_solve,
+                            get_tdp,
+                            getPerformanceIndicator
+
+function __init__()
+    @info "Activating Cuda Extension"
+
+    # Register in Camnas
+    CAMNAS.register_accelerator!(CUDAccelerator)
+end
 
 """
     CUDAccelerator <: AbstractAccelerator
@@ -194,4 +216,6 @@ function system_matrix_dev2host(cuda_lu::CUDAccelerator_LUdecomp) #transfer LU f
 
     M_cpu = SparseMatrixCSR{1}(nrow, ncol, rowPtr, colVal, nzVal) # 1 indicates index base
     return  M_cpu
+end
+
 end
