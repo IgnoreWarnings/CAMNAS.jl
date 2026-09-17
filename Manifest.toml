@@ -105,7 +105,7 @@ uuid = "0b880eee-5bea-49e4-84ce-93e95af8a2a0"
 version = "0.2.0"
 
     [deps.CAMNAS.extensions]
-    CudaAccelerator = ["CUDA", "CUSOLVERRF"]
+    CUDAccelerator = ["CUDA", "CUSOLVERRF"]
     CudssAccelerator = "CUDSS"
     MetalAccelerator = "Metal"
 
