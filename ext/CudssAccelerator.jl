@@ -9,7 +9,6 @@ using CUDSS
 
 using CUDA
 using CUDA.CUSPARSE
-using CUSOLVERRF
 using SparseMatricesCSR
 
 using CAMNAS.Accelerators: AbstractAccelerator,
