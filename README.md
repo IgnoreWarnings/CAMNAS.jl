@@ -90,6 +90,10 @@ This script allows testing all externally accessible functions directly within J
 
 To ensure compatibility with DPsim, three test case inputs of different sizes are provided. The specific input size can be adjusted using the `inputType` variable at the beginning of the script. All inputs are designed to satisfy the equation `x = A \ b`, where `A` is a sparse matrix in CSR format and `b` is a vector.
 
+### Testing in docker
+sudo docker build -t camnas -f Dockerfile.dev
+sudo docker run -it --device nvidia.com/gpu=all -v .:/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl -t camnas /bin/bash
+
 ## Contribution
 We require all commits to be signed-off by the contributer. By doing this, you state that you agree to the terms of the "Developer Certificate of Origin (DCO)" (https://developercertificate.org), for the submitted contribution.
 
