@@ -1,4 +1,4 @@
-module CudssAccelerator
+module CUDSSAccelerator
 
 using CAMNAS
 
@@ -45,7 +45,7 @@ struct CUDSSAccelerator <: AbstractAccelerator
     properties::AcceleratorProperties
     device::CuDevice
 
-    function CUDSSAccelerator(name::String="cuddss", dev::CuDevice=CUDA.device(), properties=AcceleratorProperties(true, 1, 1.0, floatmax()))
+    function CUDSSAccelerator(name::String="CUDSSAccelerator", dev::CuDevice=CUDA.device(), properties=AcceleratorProperties(true, 1, 1.0, floatmax()))
         new(name, properties, dev)
     end
 end
