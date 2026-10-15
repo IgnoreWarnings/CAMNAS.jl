@@ -1,8 +1,8 @@
-module CUDSSAccelerator
+module CUDSSExt
 
 using CAMNAS
 
-export CUDSSAccelerator, CUDSSAccelerator_LUdecomp
+#export CUDSSAccelerator, CUDSSAccelerator_LUdecomp
 export discover_accelerator, mna_decomp, mna_solve
 
 using CUDSS
@@ -19,7 +19,8 @@ import CAMNAS.Accelerators: discover_accelerator,
                             mna_decomp,
                             mna_solve,
                             get_tdp,
-                            getPerformanceIndicator
+                            getPerformanceIndicator,
+                            ludecomp_type
 
 function __init__()
     @info "Activating Cudss Extension"
@@ -69,6 +70,9 @@ struct CUDSSAccelerator_LUdecomp <: AbstractLUdecomp
         new(solver, zeros(solver.matrix.nrows, solver.matrix.nrows))
     end
 end
+
+ludecomp_type(::Type{CUDSSAccelerator}) = CUDSSAccelerator_LUdecomp
+
 # size(decomp:: CUDSSAccelerator_LUdecomp) = [decomp.matrix.nrows, decomp.matrix.nrows]
 # CUDSSAccelerator_LUdecomp(solver::CUDSS.CudssSolver) = CUDSSAccelerator_LUdecomp(solver, [solver.matrix.nrows])
 

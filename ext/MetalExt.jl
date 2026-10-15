@@ -1,4 +1,4 @@
-module MetalAccelerator
+module MetalExt
 
 export MetalAccelerator, MetalAccelerator_LUdecomp
 export discover_accelerator, mna_decomp, mna_solve
@@ -31,7 +31,7 @@ struct MetalAccelerator <: AbstractAccelerator
 end
 
 # DenseMatrix since Sparse Matrix support for Metal.jl is not implemented yet.
-struct MetalAccelerator_LUdecomp <: AbstractLUdecomp
+struct lu_decomp <: AbstractLUdecomp
     lu_decomp::LU{Float32, MtlMatrix{Float32, Metal.PrivateStorage}, MtlVector{UInt32, Metal.PrivateStorage}}
     inverse::LU{Float32, MtlMatrix{Float32, Metal.PrivateStorage}, MtlVector{UInt32, Metal.PrivateStorage}}
 end

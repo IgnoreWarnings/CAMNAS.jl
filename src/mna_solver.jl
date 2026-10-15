@@ -349,24 +349,6 @@ function set_csr_mat(csr_matrix)
 end
 
 """
-    get_ludecomp_type(accelerator::AbstractAccelerator) -> Type
-
-Given an accelerator object, returns the corresponding LU decomposition type
-by naming convention: <AcceleratorType>_LUdecomp
-"""
-function get_ludecomp_type(accelerator::AbstractAccelerator)
-    acc_type = typeof(accelerator)
-    acc_name = string(nameof(typeof(accelerator)))  
-    lu_type_name = Symbol(acc_name * "_LUdecomp")  
-
-    if !isdefined(Accelerators, lu_type_name)
-        error("LU decomposition type $lu_type_name not defined in module $(mod).")
-    end
-
-    return getfield(Accelerators, lu_type_name)
-end
-
-"""
     mna_decomp(sparse_mat::SparseMatrixCSC) -> Vector{AbstractLUdecomp}
 
 Performs the MNA decomposition of the given sparse matrix using the current accelerator.
