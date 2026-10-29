@@ -69,7 +69,7 @@ jobs:
       - run: |
           gunzip -c image.tar.gz | docker load
 
-      - name: Instantiate Julia packages and compile libraries
+      - name: Build Plugin
         run: |
           docker run --rm \
             --name camnas \
