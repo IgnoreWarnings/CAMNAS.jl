@@ -14,54 +14,59 @@ const target_dir = ARGS[1]
 project = Base.active_project()
 project_dir = dirname(project)
 
-# function require_without_errors(package_name)
-#     logger = TestLogger(min_level=Logging.Error)
+function require_without_errors(package_name)
+    logger = TestLogger(min_level=Logging.Error)
 
-#     with_logger(logger) do
-#         Base.require(Main, Symbol(package_name))
-#     end
+    with_logger(logger) do
+        Base.require(Main, Symbol(package_name))
+    end
 
-#     if !isempty(logger.logs)
-#         error("Loading $package_name produced errors")
-#     end
-# end
+    if !isempty(logger.logs)
+        error("Loading $package_name produced errors")
+    end
+end
 
-# function add_weakdeps_for_compilation()
-#     toml = TOML.parsefile(project)
-#     weakdeps = get(toml, "weakdeps", Dict())
+# Note: Adding packages individually leads to incompatible versions. Thats they are tested individially and then addes as a list
+function probe_weakdeps()
+    toml = TOML.parsefile(project)
+    weakdeps = get(toml, "weakdeps", Dict())
 
-#     # Create a temporary environment to install the weak dependencies if possible
-#     Pkg.activate(; temp = true)
+    addable = String[]
+    original_project = Base.active_project()
 
-#     addable = String[]
+    for (package_name, _) in weakdeps
+        @info("Testing host for weak dependency $package_name support...")
 
-#     for (package_name, _) in weakdeps
-#         @info("Testing host for weak dependency $package_name support...")
+        try
+            # Note: We use a temp env because after adding the weakdep the extension will be loaded.
+            # If the weakdep then gets removed it triggers a load error
+            Pkg.activate(; temp = true)
 
-#         try
-#             Pkg.add(package_name)
+            Pkg.add(package_name)
 
-#             # Check for error messages
-#             require_without_errors(package_name)
+            # Check for error messages
+            require_without_errors(package_name)
 
-#             # TODO: More checks like Cuda functional
+            # TODO: More checks like Cuda functional
 
-#             push!(addable, package_name)
-#         catch err
-#             @warn "Could not add weak dependency $package_name; reason: $err" exception=(err, catch_backtrace())
-#         finally
-#             # Remove the package from the temporary environment to avoid conflicts
-#             Pkg.rm(package_name)
-#         end
-#     end
+            push!(addable, package_name)
+        catch err
+            try
+                Pkg.rm(package_name)
+            catch err
+            end
+            @warn "Could not add weak dependency $package_name; reason: $err" exception=(err, catch_backtrace())
+        end
+    end
 
-#     return addable
-# end
+    Pkg.activate(original_project)
 
-# addable = add_weakdeps_for_compilation()
+    return addable
+end
 
-addable = ["CUDA", "CUDSS"]
-
+# Add packages for extension activation
+addable = probe_weakdeps()
+@info "Adding the following packages for extensions: $addable"
 Pkg.add(addable)
 
 @info "Creating CAMNAS solver library in $target_dir"
