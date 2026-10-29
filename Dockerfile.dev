@@ -50,5 +50,8 @@ RUN wget -q https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MAJOR}/juli
 ENV JULIA_BINDIR=/usr/local/julia-${JULIA_VERSION}/bin
 ENV PATH=/usr/local/julia-${JULIA_VERSION}/bin:$PATH
 
+# Instantiate packages
+RUN julia --project=$(pwd) --eval="using Pkg;Pkg.instantiate()"
+
 # Copy Camnas source
 WORKDIR /app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl
