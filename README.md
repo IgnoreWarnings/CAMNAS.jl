@@ -22,11 +22,13 @@ sudo docker build -t camnas .
 <em>Note: To be able to use gpus in containers refer to https://podman-desktop.io/docs/podman/gpu </em>
 The folllowing command will give the build process access to gpus and mount the local camnas folder inside of the container:
 ```shell
-sudo docker run -it --device nvidia.com/gpu=all -v .:/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl -t camnas make
+sudo docker run -it --device nvidia.com/gpu=all -v .:/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl -t camnas /bin/bash
 ```
 
 Then inside the docker shell type
 ```shell
+# Instantiate packages
+julia --project=. -e 'using Pkg; Pkg.instantiate()'
 make
 ```
 to build the shared library.
