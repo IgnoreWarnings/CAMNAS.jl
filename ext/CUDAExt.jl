@@ -1,4 +1,4 @@
-module CUDExt
+module CUDAExt
 
 export CUDAccelerator, CUDAccelerator_LUdecomp
 export discover_accelerator, mna_decomp, mna_solve
