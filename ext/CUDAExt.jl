@@ -62,7 +62,7 @@ on the GPU.
 # Fields
 - `lu_decomp::CUSOLVERRF.RFLU` : the GPU-resident LU factorization object.
 """
-struct lu_decomp <: AbstractLUdecomp
+struct CUDAccelerator_LUdecomp <: AbstractLUdecomp
     lu_decomp::CUSOLVERRF.RFLU
 end
 
