@@ -65,9 +65,10 @@ function probe_weakdeps()
 end
 
 # Add packages for extension activation
-addable = probe_weakdeps()
-@info "Adding the following packages for extensions: $addable"
-Pkg.add(addable)
+# addable = probe_weakdeps()
+#@info "Adding the following packages for extensions: $addable"
+# Pkg.add(addable)
+Pkg.add(["CUDA", "CUDSS"])
 
 @info "Creating CAMNAS solver library in $target_dir"
 PackageCompiler.create_library("$(build_dir)/..", target_dir;
