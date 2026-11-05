@@ -29,7 +29,7 @@ Then inside the docker shell type
 ```shell
 # Instantiate packages
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
-make
+make -j8
 ```
 to build the shared library.
 
