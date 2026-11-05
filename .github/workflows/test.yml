@@ -87,9 +87,10 @@ jobs:
       - name: Run solver Plugin
         run: |
           docker run --rm \
-            -e JL_MNA_ALLOW_GPU=false \
-            camnas \
-            bash -lc '
-              export LD_LIBRARY_PATH=/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl:/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl/camnas/lib:$LD_LIBRARY_PATH
-              exec ./WSCC_9bus_mult_coupled -U Plugin -P camnasjl
-            '
+              -e JL_MNA_ALLOW_GPU=false \
+              camnas \
+              bash -lc '
+                cd /app/dpsim/build/dpsim/examples/cxx
+                export LD_LIBRARY_PATH=/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl:/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl/camnas/lib:$LD_LIBRARY_PATH
+                exec ./WSCC_9bus_mult_coupled -U Plugin -P camnasjl
+              '
