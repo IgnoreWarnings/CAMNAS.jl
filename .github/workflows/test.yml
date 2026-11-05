@@ -69,6 +69,7 @@ jobs:
       - run: |
           gunzip -c image.tar.gz | docker load
 
+
       - name: Build Plugin
         run: |
           docker run --rm \
@@ -92,4 +93,3 @@ jobs:
                 cd /app/dpsim/build/dpsim/examples/cxx
                 export LD_LIBRARY_PATH=/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl:/app/dpsim/dpsim/src/SolverPlugins/CAMNAS.jl/camnas/lib:$LD_LIBRARY_PATH
                 exec ./WSCC_9bus_mult_coupled -U Plugin -P camnasjl
-              '
