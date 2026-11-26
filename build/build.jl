@@ -13,17 +13,6 @@ const target_dir = ARGS[1]
 const project = Base.active_project()
 const project_dir = dirname(project)
 
-
-using Pkg
-using TOML
-using Logging
-
-const build_dir = @__DIR__
-const target_dir = ARGS[1]
-
-const project = Base.active_project()
-const project_dir = dirname(project)
-
 function parse_backend_extensions(project)
     toml = TOML.parsefile(project)
     extensions = get(toml, "extensions", Dict())
